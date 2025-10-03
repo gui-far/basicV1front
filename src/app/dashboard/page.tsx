@@ -29,15 +29,15 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="text-xl">Groups</CardTitle>
-                <CardDescription>Manage user groups</CardDescription>
+                <CardDescription>Manage user groups and permissions</CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-gray-600 mb-4">
-                  Create and delete groups for organizing users.
+                  Create and manage groups, assign users to groups, and configure endpoint access.
                 </p>
                 <Link href="/groups">
                   <Button className="w-full">Go to Groups</Button>
@@ -56,21 +56,6 @@ export default function DashboardPage() {
                 </p>
                 <Link href="/endpoints">
                   <Button className="w-full">Go to Endpoints</Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-xl">Permissions</CardTitle>
-                <CardDescription>Manage access control</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600 mb-4">
-                  Configure user and endpoint permissions.
-                </p>
-                <Link href="/permissions">
-                  <Button className="w-full">Go to Permissions</Button>
                 </Link>
               </CardContent>
             </Card>

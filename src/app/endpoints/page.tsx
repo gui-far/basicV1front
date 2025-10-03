@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { endpointService, Endpoint } from '@/services/endpointService'
+import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 
 export default function EndpointsPage() {
@@ -17,17 +18,43 @@ export default function EndpointsPage() {
   const [method, setMethod] = useState('GET')
   const [isPublic, setIsPublic] = useState(false)
   const [endpoints, setEndpoints] = useState<Endpoint[]>([])
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const { accessToken } = useAuth()
+  const { toast } = useToast()
+
+  useEffect(() => {
+    const fetchEndpoints = async () => {
+      if (!accessToken) {
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        const fetchedEndpoints = await endpointService
+          .listEndpoints(accessToken)
+
+        setEndpoints(fetchedEndpoints)
+      } catch (err) {
+        console
+          .error('Failed to fetch endpoints:', err)
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to load endpoints. Please check your permissions.',
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchEndpoints()
+  }, [accessToken])
 
   const handleCreateEndpoint = async (e: React.FormEvent) => {
     e
       .preventDefault()
 
-    setError('')
-    setSuccess('')
     setIsSubmitting(true)
 
     try {
@@ -46,23 +73,27 @@ export default function EndpointsPage() {
       setPath('')
       setMethod('GET')
       setIsPublic(false)
-      setSuccess('Endpoint created successfully')
+      toast({
+        title: 'Success',
+        description: 'Endpoint created successfully',
+      })
     } catch (err) {
       const errorMessage = err instanceof Error
         ? err
           .message
         : 'An error occurred while creating endpoint'
 
-      setError(errorMessage)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: errorMessage,
+      })
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const handleDeleteEndpoint = async (endpointId: string) => {
-    setError('')
-    setSuccess('')
-
     const confirmed = confirm('Are you sure you want to delete this endpoint?')
 
     if (!confirmed) {
@@ -80,14 +111,21 @@ export default function EndpointsPage() {
       setEndpoints(endpoints
         .filter(e => e.id !== endpointId))
 
-      setSuccess('Endpoint deleted successfully')
+      toast({
+        title: 'Success',
+        description: 'Endpoint deleted successfully',
+      })
     } catch (err) {
       const errorMessage = err instanceof Error
         ? err
           .message
         : 'An error occurred while deleting endpoint'
 
-      setError(errorMessage)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: errorMessage,
+      })
     }
   }
 
@@ -157,16 +195,6 @@ export default function EndpointsPage() {
                   />
                   <Label htmlFor="isPublic">Public Endpoint</Label>
                 </div>
-                {error && (
-                  <div className="text-sm text-red-600">
-                    {error}
-                  </div>
-                )}
-                {success && (
-                  <div className="text-sm text-green-600">
-                    {success}
-                  </div>
-                )}
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? 'Creating...' : 'Create Endpoint'}
                 </Button>

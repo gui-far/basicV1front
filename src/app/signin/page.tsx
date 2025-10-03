@@ -6,20 +6,20 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 
 export default function SignInPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { signIn } = useAuth()
+  const { toast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e
       .preventDefault()
 
-    setError('')
     setIsSubmitting(true)
 
     try {
@@ -30,7 +30,11 @@ export default function SignInPage() {
           .message
         : 'An error occurred during signin'
 
-      setError(errorMessage)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: errorMessage,
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -67,11 +71,6 @@ export default function SignInPage() {
                 required
               />
             </div>
-            {error && (
-              <div className="text-sm text-red-600">
-                {error}
-              </div>
-            )}
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? 'Signing in...' : 'Sign In'}
             </Button>

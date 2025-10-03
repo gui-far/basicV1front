@@ -87,6 +87,10 @@ class AuthService {
     })
 
     if (!response.ok) {
+      if (response.status === 401) {
+        return
+      }
+
       const errorData = await response
         .json()
         .catch(() => ({ message: 'Signout failed' }))

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,22 +9,51 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { groupService, Group } from '@/services/groupService'
+import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export default function GroupsPage() {
+  const router = useRouter()
   const [groupName, setGroupName] = useState('')
   const [groups, setGroups] = useState<Group[]>([])
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const { accessToken } = useAuth()
+  const { toast } = useToast()
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      if (!accessToken) {
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        const fetchedGroups = await groupService
+          .listGroups(accessToken)
+
+        setGroups(fetchedGroups)
+      } catch (err) {
+        console
+          .error('Failed to fetch groups:', err)
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to load groups. Please check your permissions.',
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchGroups()
+  }, [accessToken])
 
   const handleCreateGroup = async (e: React.FormEvent) => {
     e
       .preventDefault()
 
-    setError('')
-    setSuccess('')
     setIsSubmitting(true)
 
     try {
@@ -37,23 +66,27 @@ export default function GroupsPage() {
 
       setGroups([...groups, newGroup])
       setGroupName('')
-      setSuccess('Group created successfully')
+      toast({
+        title: 'Success',
+        description: 'Group created successfully',
+      })
     } catch (err) {
       const errorMessage = err instanceof Error
         ? err
           .message
         : 'An error occurred while creating group'
 
-      setError(errorMessage)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: errorMessage,
+      })
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const handleDeleteGroup = async (groupId: string) => {
-    setError('')
-    setSuccess('')
-
     const confirmed = confirm('Are you sure you want to delete this group?')
 
     if (!confirmed) {
@@ -71,14 +104,21 @@ export default function GroupsPage() {
       setGroups(groups
         .filter(g => g.id !== groupId))
 
-      setSuccess('Group deleted successfully')
+      toast({
+        title: 'Success',
+        description: 'Group deleted successfully',
+      })
     } catch (err) {
       const errorMessage = err instanceof Error
         ? err
           .message
         : 'An error occurred while deleting group'
 
-      setError(errorMessage)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: errorMessage,
+      })
     }
   }
 
@@ -111,16 +151,6 @@ export default function GroupsPage() {
                     required
                   />
                 </div>
-                {error && (
-                  <div className="text-sm text-red-600">
-                    {error}
-                  </div>
-                )}
-                {success && (
-                  <div className="text-sm text-green-600">
-                    {success}
-                  </div>
-                )}
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? 'Creating...' : 'Create Group'}
                 </Button>
@@ -136,7 +166,11 @@ export default function GroupsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {groups.length > 0 ? (
+              {isLoading ? (
+                <p className="text-sm text-gray-500 text-center py-8">
+                  Loading groups...
+                </p>
+              ) : groups.length > 0 ? (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -153,13 +187,22 @@ export default function GroupsPage() {
                           <TableCell>{new Date(group.createdAt)
                             .toLocaleDateString()}</TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleDeleteGroup(group.id)}
-                            >
-                              Delete
-                            </Button>
+                            <div className="flex gap-2 justify-end">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => router.push(`/groups/${group.id}`)}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleDeleteGroup(group.id)}
+                              >
+                                Delete
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}

@@ -9,6 +9,26 @@ export interface Group {
   updatedAt: string
 }
 
+export interface GroupUser {
+  id: string
+  email: string
+}
+
+export interface GroupEndpoint {
+  id: string
+  description: string
+  path: string
+  method: string
+}
+
+export interface GroupDetails {
+  id: string
+  name: string
+  createdAt: string
+  users: GroupUser[]
+  endpoints: GroupEndpoint[]
+}
+
 export interface CreateGroupRequest {
   name: string
 }
@@ -118,6 +138,54 @@ class GroupService {
 
       throw new Error(errorData.message || 'Failed to remove user from group')
     }
+  }
+
+  async listGroups(accessToken: string): Promise<Group[]> {
+    const url = `${this.baseUrl}/group`
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    })
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: 'Failed to fetch groups' }))
+
+      throw new Error(errorData.message || 'Failed to fetch groups')
+    }
+
+    const responseData = await response
+      .json()
+
+    return responseData
+  }
+
+  async getGroupDetails(groupId: string, accessToken: string): Promise<GroupDetails> {
+    const url = `${this.baseUrl}/group/${groupId}`
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    })
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: 'Failed to fetch group details' }))
+
+      throw new Error(errorData.message || 'Failed to fetch group details')
+    }
+
+    const responseData = await response
+      .json()
+
+    return responseData
   }
 }
 

@@ -125,6 +125,30 @@ class EndpointService {
       throw new Error(errorData.message || 'Failed to remove endpoint from group')
     }
   }
+
+  async listEndpoints(accessToken: string): Promise<Endpoint[]> {
+    const url = `${this.baseUrl}/endpoint`
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    })
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: 'Failed to fetch endpoints' }))
+
+      throw new Error(errorData.message || 'Failed to fetch endpoints')
+    }
+
+    const responseData = await response
+      .json()
+
+    return responseData
+  }
 }
 
 export const endpointService = new EndpointService()
