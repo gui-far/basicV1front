@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
+import { authService } from '@/services/authService'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -9,11 +9,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 
-export default function SignInPage() {
+export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { signIn } = useAuth()
+  const [isSuccess, setIsSuccess] = useState(false)
   const { toast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,12 +22,20 @@ export default function SignInPage() {
     setIsSubmitting(true)
 
     try {
-      await signIn({ email, password })
+      await authService
+        .forgotPassword(email)
+
+      setIsSuccess(true)
+
+      toast({
+        title: 'Success',
+        description: 'Password reset email sent. Please check your inbox.',
+      })
     } catch (err) {
       const errorMessage = err instanceof Error
         ? err
           .message
-        : 'An error occurred during signin'
+        : 'An error occurred while sending password reset email'
 
       toast({
         variant: 'destructive',
@@ -40,12 +47,38 @@ export default function SignInPage() {
     }
   }
 
+  if (isSuccess) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Check Your Email</CardTitle>
+            <CardDescription>
+              We&apos;ve sent a password reset link to {email}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-600 mb-4">
+              Please check your email and click on the reset link to create a new password.
+              The link will expire in 60 minutes.
+            </p>
+            <Link href="/signin">
+              <Button className="w-full">Back to Sign In</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Sign In</CardTitle>
-          <CardDescription>Sign in to your account</CardDescription>
+          <CardTitle>Forgot Password</CardTitle>
+          <CardDescription>
+            Enter your email address and we&apos;ll send you a link to reset your password
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -60,29 +93,13 @@ export default function SignInPage() {
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <div className="text-right">
-                <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
-                  Forgot Password?
-                </Link>
-              </div>
-            </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Signing in...' : 'Sign In'}
+              {isSubmitting ? 'Sending...' : 'Send Reset Link'}
             </Button>
             <div className="text-center text-sm">
-              Don&apos;t have an account?{' '}
-              <Link href="/signup" className="text-blue-600 hover:underline">
-                Sign up
+              Remember your password?{' '}
+              <Link href="/signin" className="text-blue-600 hover:underline">
+                Sign in
               </Link>
             </div>
           </form>

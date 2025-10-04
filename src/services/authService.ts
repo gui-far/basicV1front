@@ -22,6 +22,15 @@ export interface AuthError {
   statusCode: number
 }
 
+export interface ForgotPasswordRequest {
+  email: string
+}
+
+export interface ResetPasswordRequest {
+  token: string
+  newPassword: string
+}
+
 class AuthService {
   private baseUrl: string
 
@@ -96,6 +105,48 @@ class AuthService {
         .catch(() => ({ message: 'Signout failed' }))
 
       throw new Error(errorData.message || 'Signout failed')
+    }
+  }
+
+  async forgotPassword(email: string): Promise<void> {
+    const url = `${this.baseUrl}/auth/forgot-password`
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON
+        .stringify({ email }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: 'Failed to send password reset email' }))
+
+      throw new Error(errorData.message || 'Failed to send password reset email')
+    }
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const url = `${this.baseUrl}/auth/reset-password`
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON
+        .stringify({ token, newPassword }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: 'Failed to reset password' }))
+
+      throw new Error(errorData.message || 'Failed to reset password')
     }
   }
 }
