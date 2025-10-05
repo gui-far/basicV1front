@@ -39,7 +39,7 @@ class AuthService {
   }
 
   async signUp(data: SignUpRequest): Promise<void> {
-    const url = `${this.baseUrl}/auth/signup`
+    const url = `${this.baseUrl}/api/auth/signup`
 
     const response = await fetch(url, {
       method: 'POST',
@@ -60,7 +60,7 @@ class AuthService {
   }
 
   async signIn(data: SignInRequest): Promise<SignInResponse> {
-    const url = `${this.baseUrl}/auth/signin`
+    const url = `${this.baseUrl}/api/auth/signin`
 
     const response = await fetch(url, {
       method: 'POST',
@@ -86,7 +86,7 @@ class AuthService {
   }
 
   async signOut(accessToken: string): Promise<void> {
-    const url = `${this.baseUrl}/auth/signout`
+    const url = `${this.baseUrl}/api/auth/signout`
 
     const response = await fetch(url, {
       method: 'POST',
@@ -109,10 +109,10 @@ class AuthService {
   }
 
   async forgotPassword(email: string): Promise<void> {
-    const url = `${this.baseUrl}/auth/forgot-password`
+    const url = `${this.baseUrl}/api/auth/password-email`
 
     const response = await fetch(url, {
-      method: 'POST',
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -130,10 +130,10 @@ class AuthService {
   }
 
   async resetPassword(token: string, newPassword: string): Promise<void> {
-    const url = `${this.baseUrl}/auth/reset-password`
+    const url = `${this.baseUrl}/api/auth/password-reset`
 
     const response = await fetch(url, {
-      method: 'POST',
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },

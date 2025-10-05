@@ -51,7 +51,7 @@ class GroupService {
   }
 
   async createGroup(data: CreateGroupRequest, accessToken: string): Promise<Group> {
-    const url = `${this.baseUrl}/group/create`
+    const url = `${this.baseUrl}/api/group`
 
     const response = await fetch(url, {
       method: 'POST',
@@ -78,7 +78,7 @@ class GroupService {
   }
 
   async deleteGroup(groupId: string, accessToken: string): Promise<void> {
-    const url = `${this.baseUrl}/group/${groupId}`
+    const url = `${this.baseUrl}/api/group/${groupId}`
 
     const response = await fetch(url, {
       method: 'DELETE',
@@ -97,16 +97,13 @@ class GroupService {
   }
 
   async addUserToGroup(data: AddUserToGroupRequest, accessToken: string): Promise<void> {
-    const url = `${this.baseUrl}/group/add-user`
+    const url = `${this.baseUrl}/api/group/${data.groupId}/user/${data.userId}`
 
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${accessToken}`,
       },
-      body: JSON
-        .stringify(data),
     })
 
     if (!response.ok) {
@@ -119,16 +116,13 @@ class GroupService {
   }
 
   async removeUserFromGroup(data: RemoveUserFromGroupRequest, accessToken: string): Promise<void> {
-    const url = `${this.baseUrl}/group/remove-user`
+    const url = `${this.baseUrl}/api/group/${data.groupId}/user/${data.userId}`
 
     const response = await fetch(url, {
-      method: 'POST',
+      method: 'DELETE',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${accessToken}`,
       },
-      body: JSON
-        .stringify(data),
     })
 
     if (!response.ok) {
@@ -141,7 +135,7 @@ class GroupService {
   }
 
   async listGroups(accessToken: string): Promise<Group[]> {
-    const url = `${this.baseUrl}/group`
+    const url = `${this.baseUrl}/api/group`
 
     const response = await fetch(url, {
       method: 'GET',
@@ -165,7 +159,7 @@ class GroupService {
   }
 
   async getGroupDetails(groupId: string, accessToken: string): Promise<GroupDetails> {
-    const url = `${this.baseUrl}/group/${groupId}`
+    const url = `${this.baseUrl}/api/group/${groupId}`
 
     const response = await fetch(url, {
       method: 'GET',

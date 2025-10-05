@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { DataTableCard } from '@/components/DataTableCard'
 import { groupService, Group } from '@/services/groupService'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
@@ -19,6 +20,7 @@ export default function GroupsPage() {
   const [groups, setGroups] = useState<Group[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const { accessToken } = useAuth()
   const { toast } = useToast()
 
@@ -30,18 +32,16 @@ export default function GroupsPage() {
       }
 
       try {
+        setFetchError(null)
         const fetchedGroups = await groupService
           .listGroups(accessToken)
 
         setGroups(fetchedGroups)
       } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load groups'
+        setFetchError(errorMessage)
         console
           .error('Failed to fetch groups:', err)
-        toast({
-          variant: 'destructive',
-          title: 'Error',
-          description: 'Failed to load groups. Please check your permissions.',
-        })
       } finally {
         setIsLoading(false)
       }
@@ -158,63 +158,53 @@ export default function GroupsPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Existing Groups</CardTitle>
-              <CardDescription>
-                {groups.length === 0 ? 'No groups created yet. Create one above to get started.' : 'Manage your groups below'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <p className="text-sm text-gray-500 text-center py-8">
-                  Loading groups...
-                </p>
-              ) : groups.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Created At</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {groups
-                      .map((group) => (
-                        <TableRow key={group.id}>
-                          <TableCell className="font-medium">{group.name}</TableCell>
-                          <TableCell>{new Date(group.createdAt)
-                            .toLocaleDateString()}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex gap-2 justify-end">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => router.push(`/groups/${group.id}`)}
-                              >
-                                Edit
-                              </Button>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => handleDeleteGroup(group.id)}
-                              >
-                                Delete
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <p className="text-sm text-gray-500 text-center py-8">
-                  No groups to display
-                </p>
-              )}
-            </CardContent>
-          </Card>
+          <DataTableCard
+            title="Existing Groups"
+            description="Manage your groups below"
+            loading={isLoading}
+            error={fetchError}
+            data={groups}
+            emptyMessage="No groups created yet. Create one above to get started."
+            renderTable={(groupsData) => (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Created At</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {groupsData
+                    .map((group) => (
+                      <TableRow key={group.id}>
+                        <TableCell className="font-medium">{group.name}</TableCell>
+                        <TableCell>{new Date(group.createdAt)
+                          .toLocaleDateString()}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => router.push(`/groups/${group.id}`)}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteGroup(group.id)}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            )}
+          />
         </div>
       </div>
     </ProtectedRoute>

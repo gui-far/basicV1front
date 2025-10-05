@@ -15,7 +15,7 @@ class UserService {
   }
 
   async listUsers(accessToken: string): Promise<User[]> {
-    const url = `${this.baseUrl}/auth/users`
+    const url = `${this.baseUrl}/api/user`
 
     const response = await fetch(url, {
       method: 'GET',

@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { DataTableCard } from '@/components/DataTableCard'
 import { endpointService, Endpoint } from '@/services/endpointService'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
@@ -20,6 +21,7 @@ export default function EndpointsPage() {
   const [endpoints, setEndpoints] = useState<Endpoint[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const { accessToken } = useAuth()
   const { toast } = useToast()
 
@@ -31,18 +33,16 @@ export default function EndpointsPage() {
       }
 
       try {
+        setFetchError(null)
         const fetchedEndpoints = await endpointService
           .listEndpoints(accessToken)
 
         setEndpoints(fetchedEndpoints)
       } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load endpoints'
+        setFetchError(errorMessage)
         console
           .error('Failed to fetch endpoints:', err)
-        toast({
-          variant: 'destructive',
-          title: 'Error',
-          description: 'Failed to load endpoints. Please check your permissions.',
-        })
       } finally {
         setIsLoading(false)
       }
@@ -163,11 +163,16 @@ export default function EndpointsPage() {
                   <Input
                     id="path"
                     type="text"
-                    placeholder="/api/example"
+                    placeholder="/api/example or /api/users/:id"
                     value={path}
                     onChange={(e) => setPath(e.target.value)}
+                    pattern="^/api/.*"
+                    title="Path must start with /api/"
                     required
                   />
+                  <p className="text-xs text-gray-500">
+                    Must start with /api/. Use :param for dynamic segments (e.g., /api/users/:id)
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="method">HTTP Method</Label>
@@ -202,57 +207,51 @@ export default function EndpointsPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Existing Endpoints</CardTitle>
-              <CardDescription>
-                {endpoints.length === 0 ? 'No endpoints created yet. Create one above to get started.' : 'Manage your endpoints below'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {endpoints.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Description</TableHead>
-                      <TableHead>Path</TableHead>
-                      <TableHead>Method</TableHead>
-                      <TableHead>Public</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {endpoints
-                      .map((endpoint) => (
-                        <TableRow key={endpoint.id}>
-                          <TableCell className="font-medium">{endpoint.description}</TableCell>
-                          <TableCell>{endpoint.path}</TableCell>
-                          <TableCell>
-                            <span className="px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-800">
-                              {endpoint.method}
-                            </span>
-                          </TableCell>
-                          <TableCell>{endpoint.isPublic ? 'Yes' : 'No'}</TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleDeleteEndpoint(endpoint.id)}
-                            >
-                              Delete
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <p className="text-sm text-gray-500 text-center py-8">
-                  No endpoints to display
-                </p>
-              )}
-            </CardContent>
-          </Card>
+          <DataTableCard
+            title="Existing Endpoints"
+            description="Manage your endpoints below"
+            loading={isLoading}
+            error={fetchError}
+            data={endpoints}
+            emptyMessage="No endpoints created yet. Create one above to get started."
+            renderTable={(endpointsData) => (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Description</TableHead>
+                    <TableHead>Path</TableHead>
+                    <TableHead>Method</TableHead>
+                    <TableHead>Public</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {endpointsData
+                    .map((endpoint) => (
+                      <TableRow key={endpoint.id}>
+                        <TableCell className="font-medium">{endpoint.description}</TableCell>
+                        <TableCell>{endpoint.path}</TableCell>
+                        <TableCell>
+                          <span className="px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-800">
+                            {endpoint.method}
+                          </span>
+                        </TableCell>
+                        <TableCell>{endpoint.isPublic ? 'Yes' : 'No'}</TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteEndpoint(endpoint.id)}
+                          >
+                            Delete
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            )}
+          />
         </div>
       </div>
     </ProtectedRoute>

@@ -37,7 +37,7 @@ class EndpointService {
   }
 
   async createEndpoint(data: CreateEndpointRequest, accessToken: string): Promise<Endpoint> {
-    const url = `${this.baseUrl}/endpoint/create`
+    const url = `${this.baseUrl}/api/endpoint`
 
     const response = await fetch(url, {
       method: 'POST',
@@ -64,7 +64,7 @@ class EndpointService {
   }
 
   async deleteEndpoint(endpointId: string, accessToken: string): Promise<void> {
-    const url = `${this.baseUrl}/endpoint/${endpointId}`
+    const url = `${this.baseUrl}/api/endpoint/${endpointId}`
 
     const response = await fetch(url, {
       method: 'DELETE',
@@ -83,16 +83,13 @@ class EndpointService {
   }
 
   async addEndpointToGroup(data: AddEndpointToGroupRequest, accessToken: string): Promise<void> {
-    const url = `${this.baseUrl}/endpoint/add-to-group`
+    const url = `${this.baseUrl}/api/group/${data.groupId}/endpoint/${data.endpointId}`
 
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${accessToken}`,
       },
-      body: JSON
-        .stringify(data),
     })
 
     if (!response.ok) {
@@ -105,16 +102,13 @@ class EndpointService {
   }
 
   async removeEndpointFromGroup(data: RemoveEndpointFromGroupRequest, accessToken: string): Promise<void> {
-    const url = `${this.baseUrl}/endpoint/remove-from-group`
+    const url = `${this.baseUrl}/api/group/${data.groupId}/endpoint/${data.endpointId}`
 
     const response = await fetch(url, {
-      method: 'POST',
+      method: 'DELETE',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${accessToken}`,
       },
-      body: JSON
-        .stringify(data),
     })
 
     if (!response.ok) {
@@ -127,7 +121,7 @@ class EndpointService {
   }
 
   async listEndpoints(accessToken: string): Promise<Endpoint[]> {
-    const url = `${this.baseUrl}/endpoint`
+    const url = `${this.baseUrl}/api/endpoint`
 
     const response = await fetch(url, {
       method: 'GET',

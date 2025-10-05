@@ -56,7 +56,7 @@ export default function EditGroupPage() {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to load data. Please check your permissions.',
+        description: err instanceof Error ? err.message : 'Failed to load data. Please check your permissions.',
       })
     } finally {
       setIsLoading(false)
