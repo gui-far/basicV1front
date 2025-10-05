@@ -112,7 +112,7 @@ class AuthService {
     const url = `${this.baseUrl}/api/auth/password-email`
 
     const response = await fetch(url, {
-      method: 'GET',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -133,7 +133,7 @@ class AuthService {
     const url = `${this.baseUrl}/api/auth/password-reset`
 
     const response = await fetch(url, {
-      method: 'GET',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
