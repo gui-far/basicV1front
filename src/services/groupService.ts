@@ -43,6 +43,10 @@ export interface RemoveUserFromGroupRequest {
   groupId: string
 }
 
+export interface UpdateGroupRequest {
+  name: string
+}
+
 class GroupService {
   private baseUrl: string
 
@@ -174,6 +178,33 @@ class GroupService {
         .catch(() => ({ message: 'Failed to fetch group details' }))
 
       throw new Error(errorData.message || 'Failed to fetch group details')
+    }
+
+    const responseData = await response
+      .json()
+
+    return responseData
+  }
+
+  async updateGroup(groupId: string, data: UpdateGroupRequest, accessToken: string): Promise<Group> {
+    const url = `${this.baseUrl}/api/group/${groupId}`
+
+    const response = await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      body: JSON
+        .stringify(data),
+    })
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: 'Failed to update group' }))
+
+      throw new Error(errorData.message || 'Failed to update group')
     }
 
     const responseData = await response

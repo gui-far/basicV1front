@@ -107,8 +107,8 @@ function ResetPasswordContent() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/forgot-password">
-              <Button className="w-full">Request New Reset Link</Button>
+            <Link href="/forgot-password" className="cursor-pointer">
+              <Button className="w-full cursor-pointer">Request New Reset Link</Button>
             </Link>
           </CardContent>
         </Card>
@@ -150,12 +150,12 @@ function ResetPasswordContent() {
                 minLength={6}
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full cursor-pointer" disabled={isSubmitting}>
               {isSubmitting ? 'Resetting...' : 'Reset Password'}
             </Button>
             <div className="text-center text-sm">
               Remember your password?{' '}
-              <Link href="/signin" className="text-blue-600 hover:underline">
+              <Link href="/signin" className="text-blue-600 hover:underline cursor-pointer">
                 Sign in
               </Link>
             </div>

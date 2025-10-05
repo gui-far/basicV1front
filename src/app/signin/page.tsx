@@ -71,17 +71,17 @@ export default function SignInPage() {
                 required
               />
               <div className="text-right">
-                <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline cursor-pointer">
                   Forgot Password?
                 </Link>
               </div>
             </div>
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full cursor-pointer" disabled={isSubmitting}>
               {isSubmitting ? 'Signing in...' : 'Sign In'}
             </Button>
             <div className="text-center text-sm">
               Don&apos;t have an account?{' '}
-              <Link href="/signup" className="text-blue-600 hover:underline">
+              <Link href="/signup" className="text-blue-600 hover:underline cursor-pointer">
                 Sign up
               </Link>
             </div>

@@ -215,8 +215,8 @@ export default function DashboardPage() {
                 <p className="text-sm text-gray-600 mb-4">
                   Create and manage groups, assign users to groups, and configure endpoint access.
                 </p>
-                <Link href="/groups">
-                  <Button className="w-full">Go to Groups</Button>
+                <Link href="/groups" className="cursor-pointer">
+                  <Button className="w-full cursor-pointer">Go to Groups</Button>
                 </Link>
               </CardContent>
             </Card>
@@ -230,8 +230,8 @@ export default function DashboardPage() {
                 <p className="text-sm text-gray-600 mb-4">
                   Create and delete API endpoints.
                 </p>
-                <Link href="/endpoints">
-                  <Button className="w-full">Go to Endpoints</Button>
+                <Link href="/endpoints" className="cursor-pointer">
+                  <Button className="w-full cursor-pointer">Go to Endpoints</Button>
                 </Link>
               </CardContent>
             </Card>
@@ -239,7 +239,7 @@ export default function DashboardPage() {
 
           <Card>
             <CardContent className="pt-6">
-              <Button onClick={handleSignOut} className="w-full" variant="destructive">
+              <Button onClick={handleSignOut} className="w-full cursor-pointer" variant="destructive">
                 Sign Out
               </Button>
             </CardContent>

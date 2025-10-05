@@ -62,8 +62,8 @@ export default function ForgotPasswordPage() {
               Please check your email and click on the reset link to create a new password.
               The link will expire in 60 minutes.
             </p>
-            <Link href="/signin">
-              <Button className="w-full">Back to Sign In</Button>
+            <Link href="/signin" className="cursor-pointer">
+              <Button className="w-full cursor-pointer">Back to Sign In</Button>
             </Link>
           </CardContent>
         </Card>
@@ -93,12 +93,12 @@ export default function ForgotPasswordPage() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full cursor-pointer" disabled={isSubmitting}>
               {isSubmitting ? 'Sending...' : 'Send Reset Link'}
             </Button>
             <div className="text-center text-sm">
               Remember your password?{' '}
-              <Link href="/signin" className="text-blue-600 hover:underline">
+              <Link href="/signin" className="text-blue-600 hover:underline cursor-pointer">
                 Sign in
               </Link>
             </div>

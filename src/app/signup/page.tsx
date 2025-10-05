@@ -71,12 +71,12 @@ export default function SignUpPage() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full cursor-pointer" disabled={isSubmitting}>
               {isSubmitting ? 'Signing up...' : 'Sign Up'}
             </Button>
             <div className="text-center text-sm">
               Already have an account?{' '}
-              <Link href="/signin" className="text-blue-600 hover:underline">
+              <Link href="/signin" className="text-blue-600 hover:underline cursor-pointer">
                 Sign in
               </Link>
             </div>

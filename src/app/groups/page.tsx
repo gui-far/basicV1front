@@ -128,8 +128,8 @@ export default function GroupsPage() {
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold">Groups Management</h1>
-            <Link href="/dashboard">
-              <Button variant="outline">Back to Dashboard</Button>
+            <Link href="/dashboard" className="cursor-pointer">
+              <Button variant="outline" className="cursor-pointer">Back to Dashboard</Button>
             </Link>
           </div>
 
@@ -151,7 +151,7 @@ export default function GroupsPage() {
                     required
                   />
                 </div>
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" className="cursor-pointer" disabled={isSubmitting}>
                   {isSubmitting ? 'Creating...' : 'Create Group'}
                 </Button>
               </form>
@@ -187,13 +187,15 @@ export default function GroupsPage() {
                               variant="outline"
                               size="sm"
                               onClick={() => router.push(`/groups/${group.id}`)}
+                              className="cursor-pointer"
                             >
-                              Edit
+                              Manage Group
                             </Button>
                             <Button
                               variant="destructive"
                               size="sm"
                               onClick={() => handleDeleteGroup(group.id)}
+                              className="cursor-pointer"
                             >
                               Delete
                             </Button>

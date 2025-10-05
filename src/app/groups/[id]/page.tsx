@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -25,6 +26,7 @@ export default function EditGroupPage() {
   const [allUsers, setAllUsers] = useState<User[]>([])
   const [selectedEndpointToAdd, setSelectedEndpointToAdd] = useState('')
   const [selectedUserToAdd, setSelectedUserToAdd] = useState('')
+  const [editedGroupName, setEditedGroupName] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const { accessToken } = useAuth()
@@ -48,6 +50,7 @@ export default function EditGroupPage() {
         ])
 
       setGroupDetails(details)
+      setEditedGroupName(details.name)
       setAllEndpoints(fetchedEndpoints)
       setAllUsers(fetchedUsers)
     } catch (err) {
@@ -215,6 +218,42 @@ export default function EditGroupPage() {
     }
   }
 
+  const handleUpdateGroupName = async () => {
+    setIsSubmitting(true)
+
+    try {
+      if (!accessToken) {
+        throw new Error('No access token available')
+      }
+
+      await groupService
+        .updateGroup(
+          groupId,
+          { name: editedGroupName },
+          accessToken
+        )
+
+      toast({
+        title: 'Success',
+        description: 'Group name updated successfully',
+      })
+      await fetchGroupDetails()
+    } catch (err) {
+      const errorMessage = err instanceof Error
+        ? err
+          .message
+        : 'An error occurred while updating group name'
+
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: errorMessage,
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50 p-8">
@@ -223,7 +262,7 @@ export default function EditGroupPage() {
             <h1 className="text-3xl font-bold">
               {isLoading ? 'Loading...' : groupDetails ? `Edit Group: ${groupDetails.name}` : 'Group Not Found'}
             </h1>
-            <Button variant="outline" onClick={() => router.push('/groups')}>
+            <Button variant="outline" onClick={() => router.push('/groups')} className="cursor-pointer">
               Back to Groups
             </Button>
           </div>
@@ -236,14 +275,28 @@ export default function EditGroupPage() {
                   <CardDescription>Information about this group</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2">
-                    <div>
-                      <span className="font-semibold">Name:</span> {groupDetails.name}
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="groupName">Group Name</Label>
+                      <Input
+                        id="groupName"
+                        type="text"
+                        value={editedGroupName}
+                        onChange={(e) => setEditedGroupName(e.target.value)}
+                        required
+                      />
                     </div>
                     <div>
                       <span className="font-semibold">Created:</span> {new Date(groupDetails.createdAt)
                         .toLocaleDateString()}
                     </div>
+                    <Button
+                      onClick={handleUpdateGroupName}
+                      disabled={isSubmitting || editedGroupName === groupDetails.name || !editedGroupName.trim()}
+                      className="cursor-pointer"
+                    >
+                      {isSubmitting ? 'Saving...' : 'Save'}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -278,7 +331,7 @@ export default function EditGroupPage() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button type="submit" disabled={isSubmitting || !selectedEndpointToAdd}>
+                        <Button type="submit" disabled={isSubmitting || !selectedEndpointToAdd} className="cursor-pointer">
                           {isSubmitting ? 'Adding...' : 'Add Endpoint'}
                         </Button>
                       </>
@@ -313,6 +366,7 @@ export default function EditGroupPage() {
                                   size="sm"
                                   onClick={() => handleRemoveEndpointFromGroup(endpoint.id)}
                                   disabled={isSubmitting}
+                                  className="cursor-pointer"
                                 >
                                   Remove
                                 </Button>
@@ -359,7 +413,7 @@ export default function EditGroupPage() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button type="submit" disabled={isSubmitting || !selectedUserToAdd}>
+                        <Button type="submit" disabled={isSubmitting || !selectedUserToAdd} className="cursor-pointer">
                           {isSubmitting ? 'Adding...' : 'Add User'}
                         </Button>
                       </>
@@ -386,6 +440,7 @@ export default function EditGroupPage() {
                                   size="sm"
                                   onClick={() => handleRemoveUserFromGroup(user.id)}
                                   disabled={isSubmitting}
+                                  className="cursor-pointer"
                                 >
                                   Remove
                                 </Button>

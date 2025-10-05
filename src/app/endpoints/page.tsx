@@ -135,8 +135,8 @@ export default function EndpointsPage() {
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <h1 className="text-3xl font-bold">Endpoints Management</h1>
-            <Link href="/dashboard">
-              <Button variant="outline">Back to Dashboard</Button>
+            <Link href="/dashboard" className="cursor-pointer">
+              <Button variant="outline" className="cursor-pointer">Back to Dashboard</Button>
             </Link>
           </div>
 
@@ -200,7 +200,7 @@ export default function EndpointsPage() {
                   />
                   <Label htmlFor="isPublic">Public Endpoint</Label>
                 </div>
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" className="cursor-pointer" disabled={isSubmitting}>
                   {isSubmitting ? 'Creating...' : 'Create Endpoint'}
                 </Button>
               </form>
@@ -242,6 +242,7 @@ export default function EndpointsPage() {
                             variant="destructive"
                             size="sm"
                             onClick={() => handleDeleteEndpoint(endpoint.id)}
+                            className="cursor-pointer"
                           >
                             Delete
                           </Button>
