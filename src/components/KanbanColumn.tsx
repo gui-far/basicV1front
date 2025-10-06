@@ -14,6 +14,7 @@ interface KanbanColumnProps {
   objectDefinition: ObjectDefinition
   onObjectClick: (object: GenericObject) => void
   onCreateObject: (properties: Record<string, any>, stageId: string) => Promise<void>
+  isOver: boolean
 }
 
 export function KanbanColumn({
@@ -22,9 +23,10 @@ export function KanbanColumn({
   objectDefinition,
   onObjectClick,
   onCreateObject,
+  isOver,
 }: KanbanColumnProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const { setNodeRef, isOver } = useDroppable({
+  const { setNodeRef } = useDroppable({
     id: stage.id,
   })
 
