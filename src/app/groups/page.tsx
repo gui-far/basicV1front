@@ -7,8 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
-import { DataTableCard } from '@/components/DataTableCard'
 import { groupService, Group } from '@/services/groupService'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
@@ -21,6 +21,7 @@ export default function GroupsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [fetchError, setFetchError] = useState<string | null>(null)
+  const [showCreateForm, setShowCreateForm] = useState(false)
   const { accessToken } = useAuth()
   const { toast } = useToast()
 
@@ -50,10 +51,7 @@ export default function GroupsPage() {
     fetchGroups()
   }, [accessToken])
 
-  const handleCreateGroup = async (e: React.FormEvent) => {
-    e
-      .preventDefault()
-
+  const handleCreateGroup = async () => {
     setIsSubmitting(true)
 
     try {
@@ -66,6 +64,7 @@ export default function GroupsPage() {
 
       setGroups([...groups, newGroup])
       setGroupName('')
+      setShowCreateForm(false)
       toast({
         title: 'Success',
         description: 'Group created successfully',
@@ -135,37 +134,56 @@ export default function GroupsPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Create New Group</CardTitle>
-              <CardDescription>Add a new group to the system</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Existing Groups</CardTitle>
+                  <CardDescription>
+                    {isLoading
+                      ? 'Loading...'
+                      : fetchError
+                      ? 'Error loading data'
+                      : groups.length === 0
+                      ? 'No groups created yet. Create one to get started.'
+                      : 'Manage your groups below'}
+                  </CardDescription>
+                </div>
+                <Button onClick={() => setShowCreateForm(true)} className="cursor-pointer">
+                  Create Group
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleCreateGroup} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="groupName">Group Name</Label>
-                  <Input
-                    id="groupName"
-                    type="text"
-                    placeholder="Enter group name"
-                    value={groupName}
-                    onChange={(e) => setGroupName(e.target.value)}
-                    required
-                  />
+              {isLoading ? (
+                <div className="space-y-3">
+                  <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
                 </div>
-                <Button type="submit" className="cursor-pointer" disabled={isSubmitting}>
-                  {isSubmitting ? 'Creating...' : 'Create Group'}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-
-          <DataTableCard
-            title="Existing Groups"
-            description="Manage your groups below"
-            loading={isLoading}
-            error={fetchError}
-            data={groups}
-            emptyMessage="No groups created yet. Create one above to get started."
-            renderTable={(groupsData) => (
+              ) : fetchError ? (
+                <div className="flex items-start gap-3 p-4 rounded-lg border-yellow-200 bg-yellow-50">
+                  <svg
+                    className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-yellow-800">Unable to load data</p>
+                    <p className="text-xs text-yellow-700 mt-1">{fetchError}</p>
+                  </div>
+                </div>
+              ) : groups.length === 0 ? (
+                <p className="text-sm text-gray-500 text-center py-8">
+                  No groups created yet. Create one to get started.
+                </p>
+              ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -175,7 +193,7 @@ export default function GroupsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {groupsData
+                  {groups
                     .map((group) => (
                       <TableRow key={group.id}>
                         <TableCell className="font-medium">{group.name}</TableCell>
@@ -205,8 +223,48 @@ export default function GroupsPage() {
                     ))}
                 </TableBody>
               </Table>
-            )}
-          />
+              )}
+            </CardContent>
+          </Card>
+
+          <Dialog open={showCreateForm} onOpenChange={setShowCreateForm}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Create New Group</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="groupName">Group Name</Label>
+                  <Input
+                    id="groupName"
+                    type="text"
+                    placeholder="Enter group name"
+                    value={groupName}
+                    onChange={(e) => setGroupName(e.target.value)}
+                  />
+                </div>
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowCreateForm(false)
+                      setGroupName('')
+                    }}
+                    className="cursor-pointer"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleCreateGroup}
+                    disabled={isSubmitting || !groupName}
+                    className="cursor-pointer"
+                  >
+                    {isSubmitting ? 'Creating...' : 'Create'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </ProtectedRoute>

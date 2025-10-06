@@ -4,9 +4,16 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { authService, SignUpRequest, SignInRequest } from '@/services/authService'
 import { useRouter } from 'next/navigation'
 
+interface User {
+  userId: string
+  email: string
+  isAdmin: boolean
+}
+
 interface AuthContextType {
   accessToken: string | null
   refreshToken: string | null
+  user: User | null
   isAuthenticated: boolean
   signUp: (data: SignUpRequest) => Promise<void>
   signIn: (data: SignInRequest) => Promise<void>
@@ -16,9 +23,37 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+function decodeToken(token: string): User | null {
+  try {
+    const base64Url = token
+      .split('.')[1]
+    const base64 = base64Url
+      .replace(/-/g, '+')
+      .replace(/_/g, '/')
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(''),
+    )
+    const payload = JSON
+      .parse(jsonPayload)
+    return {
+      userId: payload.userId,
+      email: payload.email,
+      isAdmin: payload.isAdmin,
+    }
+  } catch (error) {
+    console
+      .error('Error decoding token:', error)
+    return null
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [refreshToken, setRefreshToken] = useState<string | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
 
@@ -31,6 +66,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (storedAccessToken) {
       setAccessToken(storedAccessToken)
+      const decodedUser = decodeToken(storedAccessToken)
+      setUser(decodedUser)
     }
 
     if (storedRefreshToken) {
@@ -55,6 +92,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAccessToken(response.accessToken)
     setRefreshToken(response.refreshToken)
 
+    const decodedUser = decodeToken(response.accessToken)
+    setUser(decodedUser)
+
     localStorage
       .setItem('accessToken', response.accessToken)
 
@@ -78,6 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     setAccessToken(null)
     setRefreshToken(null)
+    setUser(null)
 
     localStorage
       .removeItem('accessToken')
@@ -96,6 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         accessToken,
         refreshToken,
+        user,
         isAuthenticated,
         signUp,
         signIn,

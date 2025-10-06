@@ -205,7 +205,7 @@ export default function DashboardPage() {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="text-xl">Groups</CardTitle>
@@ -232,6 +232,21 @@ export default function DashboardPage() {
                 </p>
                 <Link href="/endpoints" className="cursor-pointer">
                   <Button className="w-full cursor-pointer">Go to Endpoints</Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-xl">Object Definitions</CardTitle>
+                <CardDescription>Dynamic objects with Kanban workflows</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600 mb-4">
+                  Create and manage dynamic object types with custom properties and Kanban stages.
+                </p>
+                <Link href="/object-definitions" className="cursor-pointer">
+                  <Button className="w-full cursor-pointer">Go to Object Definitions</Button>
                 </Link>
               </CardContent>
             </Card>
