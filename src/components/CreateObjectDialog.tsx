@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 import { Button } from './ui/button'
-import { DynamicForm } from './DynamicForm'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
 import { ObjectDefinition } from '@/services/objectDefinitionService'
 
 interface CreateObjectDialogProps {
@@ -71,13 +72,42 @@ export function CreateObjectDialog({
             </div>
           )}
 
-          <DynamicForm
-            definition={objectDefinition}
-            currentStageId={stageId}
-            values={properties}
-            onChange={setProperties}
-            mode="create"
-          />
+          <div className="space-y-4">
+            {objectDefinition
+              .definition
+              .properties
+              .map((property) => (
+                <div key={property.name}>
+                  <Label htmlFor={property.name}>
+                    {property.label}
+                    {property.required && <span className="text-red-500 ml-1">*</span>}
+                  </Label>
+                  <Input
+                    id={property.name}
+                    type={
+                      property.component === 'EmailInput'
+                        ? 'email'
+                        : property.component === 'PhoneInput'
+                          ? 'tel'
+                          : property.component === 'CurrencyInput'
+                            ? 'number'
+                            : 'text'
+                    }
+                    value={properties[property.name] || ''}
+                    onChange={(e) =>
+                      setProperties({
+                        ...properties,
+                        [property.name]:
+                          property.component === 'CurrencyInput'
+                            ? parseFloat(e.target.value) || 0
+                            : e.target.value,
+                      })
+                    }
+                    required={property.required}
+                  />
+                </div>
+              ))}
+          </div>
         </div>
 
         <div className="flex justify-end gap-2">

@@ -115,7 +115,6 @@ export function ObjectDetailModal({
             values={formValues}
             onChange={setFormValues}
             errors={errors}
-            mode="edit"
           />
         </div>
 

@@ -5,12 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { DataCard } from '@/components/DataCard'
-import { DataTableCard } from '@/components/DataTableCard'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { dashboardService, UserProfile, Analytics, Health } from '@/services/dashboardService'
-import { logService, LogEntity, ListLogsResponse } from '@/services/logService'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 export default function DashboardPage() {
   const { signOut, accessToken } = useAuth()
@@ -23,20 +20,6 @@ export default function DashboardPage() {
   const [profileError, setProfileError] = useState<string | null>(null)
   const [analyticsError, setAnalyticsError] = useState<string | null>(null)
   const [healthError, setHealthError] = useState<string | null>(null)
-
-  const [permissionLogs, setPermissionLogs] = useState<LogEntity[]>([])
-  const [permissionLogsTotal, setPermissionLogsTotal] = useState(0)
-  const [permissionLogsPage, setPermissionLogsPage] = useState(1)
-  const [permissionLogsTotalPages, setPermissionLogsTotalPages] = useState(0)
-  const [permissionLogsLoading, setPermissionLogsLoading] = useState(true)
-  const [permissionLogsError, setPermissionLogsError] = useState<string | null>(null)
-
-  const [generalLogs, setGeneralLogs] = useState<LogEntity[]>([])
-  const [generalLogsTotal, setGeneralLogsTotal] = useState(0)
-  const [generalLogsPage, setGeneralLogsPage] = useState(1)
-  const [generalLogsTotalPages, setGeneralLogsTotalPages] = useState(0)
-  const [generalLogsLoading, setGeneralLogsLoading] = useState(true)
-  const [generalLogsError, setGeneralLogsError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -86,54 +69,6 @@ export default function DashboardPage() {
     fetchDashboardData()
   }, [accessToken])
 
-  useEffect(() => {
-    const fetchPermissionLogs = async () => {
-      if (!accessToken) return
-
-      setPermissionLogsLoading(true)
-      setPermissionLogsError(null)
-
-      try {
-        const response = await logService
-          .getPermissionErrorLogs(accessToken, permissionLogsPage, 10)
-
-        setPermissionLogs(response.logs)
-        setPermissionLogsTotal(response.total)
-        setPermissionLogsTotalPages(response.totalPages)
-      } catch (error: any) {
-        setPermissionLogsError(error.message || 'Failed to load permission error logs')
-      } finally {
-        setPermissionLogsLoading(false)
-      }
-    }
-
-    fetchPermissionLogs()
-  }, [accessToken, permissionLogsPage])
-
-  useEffect(() => {
-    const fetchGeneralLogs = async () => {
-      if (!accessToken) return
-
-      setGeneralLogsLoading(true)
-      setGeneralLogsError(null)
-
-      try {
-        const response = await logService
-          .getGeneralErrorLogs(accessToken, generalLogsPage, 10)
-
-        setGeneralLogs(response.logs)
-        setGeneralLogsTotal(response.total)
-        setGeneralLogsTotalPages(response.totalPages)
-      } catch (error: any) {
-        setGeneralLogsError(error.message || 'Failed to load general error logs')
-      } finally {
-        setGeneralLogsLoading(false)
-      }
-    }
-
-    fetchGeneralLogs()
-  }, [accessToken, generalLogsPage])
-
   const handleSignOut = async () => {
     await signOut()
   }
@@ -166,62 +101,6 @@ export default function DashboardPage() {
         day: 'numeric',
       })
   }
-
-  const formatDateTime = (dateString: string): string => {
-    return new Date(dateString)
-      .toLocaleString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-  }
-
-  const truncateText = (text: string, maxLength: number = 50): string => {
-    if (text.length <= maxLength) return text
-    return text.substring(0, maxLength) + '...'
-  }
-
-  const renderLogTable = (logs: LogEntity[]) => (
-    <div className="overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[160px]">Time</TableHead>
-            <TableHead className="w-[80px]">Status</TableHead>
-            <TableHead className="w-[100px]">Method</TableHead>
-            <TableHead>Path</TableHead>
-            <TableHead>Message</TableHead>
-            <TableHead className="w-[150px]">User</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {logs
-            .map((log) => (
-            <TableRow key={log.id}>
-              <TableCell className="text-xs">{formatDateTime(log.createdAt)}</TableCell>
-              <TableCell>
-                <span className={`text-xs font-medium px-2 py-1 rounded ${
-                  log.statusCode === 403
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : log.statusCode && log.statusCode >= 500
-                    ? 'bg-red-100 text-red-800'
-                    : 'bg-orange-100 text-orange-800'
-                }`}>
-                  {log.statusCode || 'N/A'}
-                </span>
-              </TableCell>
-              <TableCell className="text-xs font-mono">{log.method || 'N/A'}</TableCell>
-              <TableCell className="text-xs font-mono">{truncateText(log.path || 'N/A', 30)}</TableCell>
-              <TableCell className="text-xs">{truncateText(log.message, 40)}</TableCell>
-              <TableCell className="text-xs">{log.user?.email || 'Unknown'}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
-  )
 
   return (
     <ProtectedRoute>
@@ -371,82 +250,6 @@ export default function DashboardPage() {
                 </Link>
               </CardContent>
             </Card>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <DataTableCard
-                title="Permission Log Errors"
-                description={`Showing ${permissionLogs.length} of ${permissionLogsTotal} permission errors`}
-                loading={permissionLogsLoading}
-                error={permissionLogsError}
-                data={permissionLogs}
-                renderTable={renderLogTable}
-                emptyMessage="No permission errors found"
-              />
-              {permissionLogsTotalPages > 1 && (
-                <div className="flex justify-between items-center">
-                  <Button
-                    onClick={() => setPermissionLogsPage((prev) => Math.max(1, prev - 1))}
-                    disabled={permissionLogsPage === 1}
-                    variant="outline"
-                    size="sm"
-                    className="cursor-pointer"
-                  >
-                    Previous
-                  </Button>
-                  <span className="text-sm text-gray-600">
-                    Page {permissionLogsPage} of {permissionLogsTotalPages}
-                  </span>
-                  <Button
-                    onClick={() => setPermissionLogsPage((prev) => Math.min(permissionLogsTotalPages, prev + 1))}
-                    disabled={permissionLogsPage === permissionLogsTotalPages}
-                    variant="outline"
-                    size="sm"
-                    className="cursor-pointer"
-                  >
-                    Next
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-4">
-              <DataTableCard
-                title="General Log Errors"
-                description={`Showing ${generalLogs.length} of ${generalLogsTotal} general errors`}
-                loading={generalLogsLoading}
-                error={generalLogsError}
-                data={generalLogs}
-                renderTable={renderLogTable}
-                emptyMessage="No general errors found"
-              />
-              {generalLogsTotalPages > 1 && (
-                <div className="flex justify-between items-center">
-                  <Button
-                    onClick={() => setGeneralLogsPage((prev) => Math.max(1, prev - 1))}
-                    disabled={generalLogsPage === 1}
-                    variant="outline"
-                    size="sm"
-                    className="cursor-pointer"
-                  >
-                    Previous
-                  </Button>
-                  <span className="text-sm text-gray-600">
-                    Page {generalLogsPage} of {generalLogsTotalPages}
-                  </span>
-                  <Button
-                    onClick={() => setGeneralLogsPage((prev) => Math.min(generalLogsTotalPages, prev + 1))}
-                    disabled={generalLogsPage === generalLogsTotalPages}
-                    variant="outline"
-                    size="sm"
-                    className="cursor-pointer"
-                  >
-                    Next
-                  </Button>
-                </div>
-              )}
-            </div>
           </div>
 
           <Card>
