@@ -7,6 +7,7 @@ interface DynamicFormProps {
   values: Record<string, any>
   onChange: (values: Record<string, any>) => void
   errors?: Record<string, string>
+  mode: 'create' | 'edit'
 }
 
 export function DynamicForm({
@@ -15,6 +16,7 @@ export function DynamicForm({
   values,
   onChange,
   errors = {},
+  mode,
 }: DynamicFormProps) {
   const propertyBehaviors = definition
     .definition
@@ -44,6 +46,7 @@ export function DynamicForm({
               onChange={(value) => handleFieldChange(property.name, value)}
               behavior={behavior as 'editable' | 'visible' | 'invisible'}
               error={errors[property.name]}
+              mode={mode}
             />
           )
         })}
