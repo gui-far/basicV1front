@@ -327,6 +327,22 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+              <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="text-xl">Endpoints</CardTitle>
+                <CardDescription>Manage API endpoints</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600 mb-4">
+                  Create and delete API endpoints.
+                </p>
+                <Link href="/endpoints" className="cursor-pointer">
+                  <Button className="w-full cursor-pointer">Go to Endpoints</Button>
+                </Link>
+              </CardContent>
+            </Card>
+
             <Card className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="text-xl">Groups</CardTitle>
@@ -338,21 +354,6 @@ export default function DashboardPage() {
                 </p>
                 <Link href="/groups" className="cursor-pointer">
                   <Button className="w-full cursor-pointer">Go to Groups</Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-xl">Endpoints</CardTitle>
-                <CardDescription>Manage API endpoints</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600 mb-4">
-                  Create and delete API endpoints.
-                </p>
-                <Link href="/endpoints" className="cursor-pointer">
-                  <Button className="w-full cursor-pointer">Go to Endpoints</Button>
                 </Link>
               </CardContent>
             </Card>

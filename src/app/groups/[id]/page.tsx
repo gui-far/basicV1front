@@ -301,6 +301,82 @@ export default function EditGroupPage() {
                 </CardContent>
               </Card>
 
+              
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Current Users</CardTitle>
+                  <CardDescription>
+                    {groupDetails.users.length === 0
+                      ? 'No users assigned to this group yet'
+                      : `${groupDetails.users.length} user(s) currently assigned`}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <form onSubmit={handleAddUserToGroup} className="flex gap-2">
+                    {isLoading ? (
+                      <p className="text-sm text-gray-500">Loading data...</p>
+                    ) : (
+                      <>
+                        <div className="flex-1">
+                          <Select value={selectedUserToAdd} onValueChange={setSelectedUserToAdd} required>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a user" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {allUsers
+                                .map((user) => (
+                                  <SelectItem key={user.id} value={user.id}>
+                                    {user.email}
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button type="submit" disabled={isSubmitting || !selectedUserToAdd} className="cursor-pointer">
+                          {isSubmitting ? 'Adding...' : 'Add User'}
+                        </Button>
+                      </>
+                    )}
+                  </form>
+
+                  {groupDetails.users.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Email</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {groupDetails
+                          .users
+                          .map((user) => (
+                            <TableRow key={user.id}>
+                              <TableCell className="font-medium">{user.email}</TableCell>
+                              <TableCell className="text-right">
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => handleRemoveUserFromGroup(user.id)}
+                                  disabled={isSubmitting}
+                                  className="cursor-pointer"
+                                >
+                                  Remove
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <p className="text-sm text-gray-500 text-center py-4">
+                      No users assigned yet. Use the form above to add users.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
                   <CardTitle>Current Endpoints</CardTitle>
@@ -383,79 +459,6 @@ export default function EditGroupPage() {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Current Users</CardTitle>
-                  <CardDescription>
-                    {groupDetails.users.length === 0
-                      ? 'No users assigned to this group yet'
-                      : `${groupDetails.users.length} user(s) currently assigned`}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <form onSubmit={handleAddUserToGroup} className="flex gap-2">
-                    {isLoading ? (
-                      <p className="text-sm text-gray-500">Loading data...</p>
-                    ) : (
-                      <>
-                        <div className="flex-1">
-                          <Select value={selectedUserToAdd} onValueChange={setSelectedUserToAdd} required>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a user" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {allUsers
-                                .map((user) => (
-                                  <SelectItem key={user.id} value={user.id}>
-                                    {user.email}
-                                  </SelectItem>
-                                ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <Button type="submit" disabled={isSubmitting || !selectedUserToAdd} className="cursor-pointer">
-                          {isSubmitting ? 'Adding...' : 'Add User'}
-                        </Button>
-                      </>
-                    )}
-                  </form>
-
-                  {groupDetails.users.length > 0 ? (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Email</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {groupDetails
-                          .users
-                          .map((user) => (
-                            <TableRow key={user.id}>
-                              <TableCell className="font-medium">{user.email}</TableCell>
-                              <TableCell className="text-right">
-                                <Button
-                                  variant="destructive"
-                                  size="sm"
-                                  onClick={() => handleRemoveUserFromGroup(user.id)}
-                                  disabled={isSubmitting}
-                                  className="cursor-pointer"
-                                >
-                                  Remove
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                      </TableBody>
-                    </Table>
-                  ) : (
-                    <p className="text-sm text-gray-500 text-center py-4">
-                      No users assigned yet. Use the form above to add users.
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
             </>
           )}
         </div>

@@ -7,11 +7,13 @@ export interface PropertyDefinition {
   label: string
   component: string
   required: boolean
+  summaryOrder?: number
 }
 
 export interface KanbanStage {
   id: string
   label: string
+  totalizerField?: string
 }
 
 export interface PropertyBehaviors {
@@ -47,6 +49,13 @@ export interface CreateObjectDefinitionRequest {
   label: string
   properties: PropertyDefinition[]
   kanban: KanbanDefinition
+  isActive?: boolean
+}
+
+export interface UpdateObjectDefinitionRequest {
+  label?: string
+  properties?: PropertyDefinition[]
+  kanban?: KanbanDefinition
   isActive?: boolean
 }
 
@@ -171,6 +180,35 @@ class ObjectDefinitionService {
         .catch(() => ({ message: 'Failed to fetch object definition' }))
 
       throw new Error(errorData.message || 'Failed to fetch object definition')
+    }
+
+    return await response
+      .json()
+  }
+
+  async updateObjectDefinition(
+    id: string,
+    data: UpdateObjectDefinitionRequest,
+    accessToken: string,
+  ): Promise<ObjectDefinition> {
+    const url = `${this.baseUrl}/api/object-definition/${id}`
+
+    const response = await fetch(url, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON
+        .stringify(data),
+    })
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: 'Failed to update object definition' }))
+
+      throw new Error(errorData.message || 'Failed to update object definition')
     }
 
     return await response

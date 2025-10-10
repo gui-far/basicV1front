@@ -117,7 +117,7 @@ export default function EditObjectDefinitionPage() {
     setPropertyBehaviors(newBehaviors)
   }
 
-  const updateStage = (index: number, field: keyof KanbanStage, value: string) => {
+  const updateStage = (index: number, field: keyof KanbanStage, value: string | undefined) => {
     const newStages = [...stages]
     const oldId = newStages[index]
       .id
@@ -126,7 +126,7 @@ export default function EditObjectDefinitionPage() {
 
     if (field === 'id' && oldId !== value) {
       const newBehaviors = { ...propertyBehaviors }
-      newBehaviors[value] = newBehaviors[oldId] || {}
+      newBehaviors[value as string] = newBehaviors[oldId] || {}
       delete newBehaviors[oldId]
       setPropertyBehaviors(newBehaviors)
     }
@@ -161,6 +161,15 @@ export default function EditObjectDefinitionPage() {
       return
     }
 
+    const summaryOrders = properties
+      .map((p) => p.summaryOrder)
+      .filter((order) => order !== undefined && order !== null)
+    const uniqueSummaryOrders = new Set(summaryOrders)
+    if (summaryOrders.length !== uniqueSummaryOrders.size) {
+      setError('Summary Order values must be unique')
+      return
+    }
+
     if (stages.length === 0 || stages.some((s) => !s.id || !s.label)) {
       setError('All stages must have an id and label')
       return
@@ -183,26 +192,22 @@ export default function EditObjectDefinitionPage() {
     setSaving(true)
 
     try {
-      // Note: We would need to create an update endpoint in the backend
-      // For now, this will show an error
-      setError('Update functionality not yet implemented in the backend')
+      await objectDefinitionService
+        .updateObjectDefinition(
+          objectDefinitionId,
+          {
+            label,
+            properties,
+            kanban: {
+              stages,
+              propertyBehaviors: filledBehaviors,
+            },
+          },
+          accessToken!,
+        )
 
-      // When update endpoint is ready:
-      // await objectDefinitionService.updateObjectDefinition(
-      //   objectDefinitionId,
-      //   {
-      //     objectType,
-      //     label,
-      //     properties,
-      //     kanban: {
-      //       stages,
-      //       propertyBehaviors: filledBehaviors,
-      //     },
-      //   },
-      //   accessToken!,
-      // )
-
-      // router.push('/object-definitions')
+      router
+        .push('/object-definitions')
     } catch (err: any) {
       setError(err.message || 'Failed to update object definition')
     } finally {
@@ -326,6 +331,16 @@ export default function EditObjectDefinitionPage() {
                             <option value="CurrencyInput">Currency Input</option>
                           </select>
                         </div>
+                        <div>
+                          <Label htmlFor={`property-summary-order-${index}`}>Summary Order</Label>
+                          <Input
+                            id={`property-summary-order-${index}`}
+                            type="number"
+                            value={property.summaryOrder ?? ''}
+                            onChange={(e) => updateProperty(index, 'summaryOrder', e.target.value ? Number(e.target.value) : undefined)}
+                            placeholder="e.g., 1, 2, 3..."
+                          />
+                        </div>
                         <div className="flex items-center gap-4">
                           <label className="flex items-center gap-2">
                             <input
@@ -396,6 +411,30 @@ export default function EditObjectDefinitionPage() {
                             </Button>
                           )}
                         </div>
+                      </div>
+
+                      <div className="mb-4">
+                        <Label htmlFor={`stage-totalizer-${index}`}>
+                          Stage Totalizer (optional)
+                        </Label>
+                        <select
+                          id={`stage-totalizer-${index}`}
+                          value={stage.totalizerField || ''}
+                          onChange={(e) => updateStage(index, 'totalizerField', e.target.value || undefined)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        >
+                          <option value="">None</option>
+                          {properties
+                            .filter((p) => p.name && (p.component === 'CurrencyInput'))
+                            .map((property) => (
+                              <option key={property.name} value={property.name}>
+                                {property.label} ({property.name})
+                              </option>
+                            ))}
+                        </select>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Select a Currency field to calculate Highest, Lowest, Total, and Average
+                        </p>
                       </div>
 
                       <div>

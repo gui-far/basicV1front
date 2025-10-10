@@ -30,9 +30,11 @@ export function ObjectCard({ object, objectDefinition, onClick }: ObjectCardProp
     return String(value)
   }
 
-  const allProperties = objectDefinition
+  const propertiesWithSummaryOrder = objectDefinition
     .definition
     .properties
+    .filter((prop) => prop.summaryOrder !== undefined && prop.summaryOrder !== null)
+    .sort((a, b) => (a.summaryOrder || 0) - (b.summaryOrder || 0))
 
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
@@ -55,20 +57,20 @@ export function ObjectCard({ object, objectDefinition, onClick }: ObjectCardProp
             />
           </svg>
         </div>
-        <CardContent className="p-4 cursor-pointer" onClick={onClick}>
-          <div className="space-y-3 pr-6">
-            {allProperties
+        <CardContent className="p-3 cursor-pointer" onClick={onClick}>
+          <div className="space-y-1 pr-6">
+            {propertiesWithSummaryOrder
               .map((prop) => {
                 const value = object.properties[prop.name]
+                const isBold = prop.summaryOrder === 1
                 return (
-                  <div key={prop.name}>
-                    <label className="text-xs font-medium text-gray-600 block mb-1">
-                      {prop.label}
-                      {prop.required && <span className="text-red-500 ml-1">*</span>}
-                    </label>
-                    <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-sm">
+                  <div key={prop.name} className="text-sm">
+                    <span className={isBold ? 'font-bold' : 'font-medium'}>
+                      {prop.label}:
+                    </span>
+                    <span className="ml-1">
                       {getDisplayValue(prop.name, value) || '-'}
-                    </div>
+                    </span>
                   </div>
                 )
               })}

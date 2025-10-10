@@ -33,6 +33,35 @@ export function KanbanColumn({
   const objectIds = objects
     .map((obj) => obj.id)
 
+  const calculateTotalizerStats = () => {
+    if (!stage.totalizerField) return null
+
+    const values = objects
+      .map((obj) => obj.properties[stage.totalizerField!])
+      .filter((val) => val !== null && val !== undefined && typeof val === 'number')
+      .map((val) => Number(val))
+
+    if (values.length === 0) return null
+
+    const highest = Math.max(...values)
+    const lowest = Math.min(...values)
+    const total = values.reduce((sum, val) => sum + val, 0)
+    const average = total / values.length
+
+    return { highest, lowest, total, average }
+  }
+
+  const totalizerStats = calculateTotalizerStats()
+
+  const formatCurrency = (value: number): string => {
+    return new Intl
+      .NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+      })
+      .format(value)
+  }
+
   return (
     <div className="flex-shrink-0 w-80">
       <Card className={`h-full ${isOver ? 'ring-2 ring-blue-500' : ''}`}>
@@ -43,6 +72,26 @@ export function KanbanColumn({
               {objects.length}
             </span>
           </CardTitle>
+          {totalizerStats && (
+            <div className="mt-3 pt-3 border-t border-gray-200 space-y-1 text-xs">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Highest:</span>
+                <span className="font-medium">{formatCurrency(totalizerStats.highest)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Lowest:</span>
+                <span className="font-medium">{formatCurrency(totalizerStats.lowest)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Total:</span>
+                <span className="font-medium">{formatCurrency(totalizerStats.total)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Average:</span>
+                <span className="font-medium">{formatCurrency(totalizerStats.average)}</span>
+              </div>
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           <Button

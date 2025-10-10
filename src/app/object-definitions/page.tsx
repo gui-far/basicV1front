@@ -89,8 +89,19 @@ export default function ObjectDefinitionsPage() {
           accessToken!,
         )
     } else {
-      // Edit mode - update functionality not yet implemented in backend
-      throw new Error('Update functionality not yet implemented in the backend')
+      await objectDefinitionService
+        .updateObjectDefinition(
+          selectedDefinition!.id,
+          {
+            label: data.label,
+            properties: data.properties,
+            kanban: {
+              stages: data.stages,
+              propertyBehaviors: data.propertyBehaviors,
+            },
+          },
+          accessToken!,
+        )
     }
 
     handleCloseDialog()
