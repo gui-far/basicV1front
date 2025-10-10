@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { endpointService, Endpoint } from '@/services/endpointService'
 import { useToast } from '@/hooks/use-toast'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
 import Link from 'next/link'
 
 export default function EndpointsPage() {
@@ -133,7 +134,15 @@ export default function EndpointsPage() {
       <div className="min-h-screen bg-gray-50 p-8">
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold">Endpoints Management</h1>
+            <div>
+              <h1 className="text-3xl font-bold">Endpoints Management</h1>
+              <Breadcrumbs
+                items={[
+                  { label: 'Dashboard', href: '/dashboard' },
+                  { label: 'Endpoints' },
+                ]}
+              />
+            </div>
             <Link href="/dashboard" className="cursor-pointer">
               <Button variant="outline" className="cursor-pointer">Back to Dashboard</Button>
             </Link>

@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ObjectDefinition, objectDefinitionService, PropertyDefinition, KanbanStage } from '@/services/objectDefinitionService'
 import { ObjectDefinitionForm } from '@/components/ObjectDefinitionForm'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
 import Link from 'next/link'
 
 export default function ObjectDefinitionsPage() {
@@ -116,7 +117,13 @@ export default function ObjectDefinitionsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-2xl">Object Definitions</CardTitle>
-                <CardDescription>
+                <Breadcrumbs
+                  items={[
+                    { label: 'Dashboard', href: '/dashboard' },
+                    { label: 'Object Definitions' },
+                  ]}
+                />
+                <CardDescription className="mt-2">
                   Manage dynamic object types and their Kanban workflows
                 </CardDescription>
               </div>
@@ -207,6 +214,14 @@ export default function ObjectDefinitionsPage() {
                               className="cursor-pointer"
                             >
                               Edit Object
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => router.push(`/object-definitions/${definition.id}/groups`)}
+                              className="cursor-pointer"
+                            >
+                              Edit Groups
                             </Button>
                             <Button
                               variant="outline"

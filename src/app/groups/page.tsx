@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { groupService, Group } from '@/services/groupService'
 import { useToast } from '@/hooks/use-toast'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
@@ -126,7 +127,15 @@ export default function GroupsPage() {
       <div className="min-h-screen bg-gray-50 p-8">
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold">Groups Management</h1>
+            <div>
+              <h1 className="text-3xl font-bold">Groups Management</h1>
+              <Breadcrumbs
+                items={[
+                  { label: 'Dashboard', href: '/dashboard' },
+                  { label: 'Groups Management' },
+                ]}
+              />
+            </div>
             <Link href="/dashboard" className="cursor-pointer">
               <Button variant="outline" className="cursor-pointer">Back to Dashboard</Button>
             </Link>

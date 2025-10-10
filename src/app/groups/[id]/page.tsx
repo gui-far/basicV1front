@@ -14,6 +14,7 @@ import { endpointService, Endpoint } from '@/services/endpointService'
 import { userService, User } from '@/services/userService'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useToast } from '@/hooks/use-toast'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
 
 export default function EditGroupPage() {
   const params = useParams()
@@ -259,9 +260,20 @@ export default function EditGroupPage() {
       <div className="min-h-screen bg-gray-50 p-8">
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold">
-              {isLoading ? 'Loading...' : groupDetails ? `Edit Group: ${groupDetails.name}` : 'Group Not Found'}
-            </h1>
+            <div>
+              <h1 className="text-3xl font-bold">
+                {isLoading ? 'Loading...' : groupDetails ? `Edit Group: ${groupDetails.name}` : 'Group Not Found'}
+              </h1>
+              {groupDetails && (
+                <Breadcrumbs
+                  items={[
+                    { label: 'Dashboard', href: '/dashboard' },
+                    { label: 'Groups Management', href: '/groups' },
+                    { label: groupDetails.name },
+                  ]}
+                />
+              )}
+            </div>
             <Button variant="outline" onClick={() => router.push('/groups')} className="cursor-pointer">
               Back to Groups
             </Button>

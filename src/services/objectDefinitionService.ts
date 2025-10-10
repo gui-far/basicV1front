@@ -69,6 +69,24 @@ export interface ListObjectDefinitionsResponse {
   totalPages: number
 }
 
+export interface ObjectDefinitionGroup {
+  id: string
+  objectDefinitionId: string
+  groupId: string
+  permissions: GroupPermissions | null
+  createdAt: string
+  group: {
+    id: string
+    name: string
+  }
+}
+
+export interface GroupPermissions {
+  [stageId: string]: {
+    [propertyName: string]: 'editable' | 'visible' | 'invisible'
+  }
+}
+
 class ObjectDefinitionService {
   private baseUrl: string
 
@@ -211,6 +229,110 @@ class ObjectDefinitionService {
         .catch(() => ({ message: 'Failed to update object definition' }))
 
       throw new Error(errorData.message || 'Failed to update object definition')
+    }
+
+    return await response
+      .json()
+  }
+
+  async assignGroupToObjectDefinition(
+    objectDefinitionId: string,
+    groupId: string,
+    accessToken: string,
+  ): Promise<ObjectDefinitionGroup> {
+    const url = `${this.baseUrl}/api/object-definition/${objectDefinitionId}/group/${groupId}`
+
+    const response = await authenticatedFetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: 'Failed to assign group to object definition' }))
+
+      throw new Error(errorData.message || 'Failed to assign group to object definition')
+    }
+
+    return await response
+      .json()
+  }
+
+  async removeGroupFromObjectDefinition(
+    objectDefinitionId: string,
+    groupId: string,
+    accessToken: string,
+  ): Promise<void> {
+    const url = `${this.baseUrl}/api/object-definition/${objectDefinitionId}/group/${groupId}`
+
+    const response = await authenticatedFetch(url, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: 'Failed to remove group from object definition' }))
+
+      throw new Error(errorData.message || 'Failed to remove group from object definition')
+    }
+  }
+
+  async listObjectDefinitionGroups(
+    objectDefinitionId: string,
+    accessToken: string,
+  ): Promise<ObjectDefinitionGroup[]> {
+    const url = `${this.baseUrl}/api/object-definition/${objectDefinitionId}/groups`
+
+    const response = await authenticatedFetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: 'Failed to fetch object definition groups' }))
+
+      throw new Error(errorData.message || 'Failed to fetch object definition groups')
+    }
+
+    return await response
+      .json()
+  }
+
+  async updateObjectDefinitionGroupPermissions(
+    objectDefinitionId: string,
+    groupId: string,
+    permissions: GroupPermissions,
+    accessToken: string,
+  ): Promise<ObjectDefinitionGroup> {
+    const url = `${this.baseUrl}/api/object-definition/${objectDefinitionId}/group/${groupId}/permissions`
+
+    const response = await authenticatedFetch(url, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON
+        .stringify({ permissions }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: 'Failed to update group permissions' }))
+
+      throw new Error(errorData.message || 'Failed to update group permissions')
     }
 
     return await response
