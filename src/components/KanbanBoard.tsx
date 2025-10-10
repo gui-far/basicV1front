@@ -72,6 +72,21 @@ export function KanbanBoard({
 
     if (object.currentStageId === newStageId) return
 
+    // Validate rollback permission
+    const currentStageIndex = stages
+      .findIndex((stage) => stage.id === object.currentStageId)
+    const newStageIndex = stages
+      .findIndex((stage) => stage.id === newStageId)
+
+    if (currentStageIndex !== -1 && newStageIndex !== -1) {
+      const isRollback = newStageIndex < currentStageIndex
+      const currentStage = stages[currentStageIndex]
+
+      if (isRollback && currentStage.allowRollback === false) {
+        return
+      }
+    }
+
     await onDragEnd(objectId, newStageId)
   }
 
@@ -88,21 +103,51 @@ export function KanbanBoard({
     return targetObject?.currentStageId || null
   }
 
+  const handleMoveToNextStage = async (objectId: string) => {
+    const object = objects.find((obj) => obj.id === objectId)
+    if (!object) return
+
+    const currentStageIndex = stages.findIndex((stage) => stage.id === object.currentStageId)
+    if (currentStageIndex === -1 || currentStageIndex === stages.length - 1) return
+
+    const nextStage = stages[currentStageIndex + 1]
+    await onDragEnd(objectId, nextStage.id)
+  }
+
+  const handleMoveToPreviousStage = async (objectId: string) => {
+    const object = objects.find((obj) => obj.id === objectId)
+    if (!object) return
+
+    const currentStageIndex = stages.findIndex((stage) => stage.id === object.currentStageId)
+    if (currentStageIndex === -1 || currentStageIndex === 0) return
+
+    const previousStage = stages[currentStageIndex - 1]
+    await onDragEnd(objectId, previousStage.id)
+  }
+
   return (
     <DndContext onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd} collisionDetection={closestCorners}>
       <div className="flex gap-4 overflow-x-auto pb-4">
         {stages
-          .map((stage) => (
-            <KanbanColumn
-              key={stage.id}
-              stage={stage}
-              objects={getObjectsByStage(stage.id)}
-              objectDefinition={objectDefinition}
-              onObjectClick={onObjectClick}
-              onCreateObject={onCreateObject}
-              isOver={getOverStageId() === stage.id}
-            />
-          ))}
+          .map((stage, index) => {
+            const nextStageId = index < stages.length - 1 ? stages[index + 1].id : undefined
+            const previousStageId = index > 0 ? stages[index - 1].id : undefined
+            return (
+              <KanbanColumn
+                key={stage.id}
+                stage={stage}
+                objects={getObjectsByStage(stage.id)}
+                objectDefinition={objectDefinition}
+                onObjectClick={onObjectClick}
+                onCreateObject={onCreateObject}
+                onMoveToNextStage={handleMoveToNextStage}
+                onMoveToPreviousStage={handleMoveToPreviousStage}
+                isOver={getOverStageId() === stage.id}
+                nextStageId={nextStageId}
+                previousStageId={previousStageId}
+              />
+            )
+          })}
       </div>
 
       <DragOverlay>

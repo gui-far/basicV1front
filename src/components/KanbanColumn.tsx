@@ -14,7 +14,11 @@ interface KanbanColumnProps {
   objectDefinition: ObjectDefinition
   onObjectClick: (object: GenericObject) => void
   onCreateObject: (properties: Record<string, any>, stageId: string) => Promise<void>
+  onMoveToNextStage?: (objectId: string) => void
+  onMoveToPreviousStage?: (objectId: string) => void
   isOver: boolean
+  nextStageId?: string
+  previousStageId?: string
 }
 
 export function KanbanColumn({
@@ -23,7 +27,11 @@ export function KanbanColumn({
   objectDefinition,
   onObjectClick,
   onCreateObject,
+  onMoveToNextStage,
+  onMoveToPreviousStage,
   isOver,
+  nextStageId,
+  previousStageId,
 }: KanbanColumnProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const { setNodeRef } = useDroppable({
@@ -112,6 +120,11 @@ export function KanbanColumn({
                     object={object}
                     objectDefinition={objectDefinition}
                     onClick={() => onObjectClick(object)}
+                    onMoveToNextStage={onMoveToNextStage ? () => onMoveToNextStage(object.id) : undefined}
+                    onMoveToPreviousStage={onMoveToPreviousStage ? () => onMoveToPreviousStage(object.id) : undefined}
+                    hasNextStage={!!nextStageId}
+                    hasPreviousStage={!!previousStageId}
+                    allowRollback={stage.allowRollback !== false}
                   />
                 ))}
             </SortableContext>

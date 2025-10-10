@@ -3,6 +3,7 @@ import { Label } from './ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { groupService, Group } from '@/services/groupService'
 import { userService, User } from '@/services/userService'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface VisibilitySettingsProps {
   visibility: 'private' | 'public' | 'shared'
@@ -21,6 +22,7 @@ export function VisibilitySettings({
   onGroupsChange,
   onUsersChange,
 }: VisibilitySettingsProps) {
+  const { user } = useAuth()
   const [groups, setGroups] = useState<Group[]>([])
   const [users, setUsers] = useState<User[]>([])
   const [loadingData, setLoadingData] = useState(false)
@@ -129,24 +131,25 @@ export function VisibilitySettings({
             <div className="max-h-40 overflow-y-auto border rounded p-2 space-y-1">
               {loadingData ? (
                 <div className="text-sm text-gray-500">Loading users...</div>
-              ) : users.length === 0 ? (
-                <div className="text-sm text-gray-500">No users available</div>
+              ) : users.filter((u) => u.email !== user?.email).length === 0 ? (
+                <div className="text-sm text-gray-500">No other users available</div>
               ) : (
                 users
-                  .map((user) => (
+                  .filter((u) => u.email !== user?.email)
+                  .map((otherUser) => (
                     <div
-                      key={user.id}
+                      key={otherUser.id}
                       className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer"
-                      onClick={() => toggleUserSelection(user.id)}
+                      onClick={() => toggleUserSelection(otherUser.id)}
                     >
                       <input
                         type="checkbox"
                         checked={selectedUserIds
-                          .includes(user.id)}
-                        onChange={() => toggleUserSelection(user.id)}
+                          .includes(otherUser.id)}
+                        onChange={() => toggleUserSelection(otherUser.id)}
                         className="cursor-pointer"
                       />
-                      <span className="text-sm">{user.email}</span>
+                      <span className="text-sm">{otherUser.email}</span>
                     </div>
                   ))
               )}

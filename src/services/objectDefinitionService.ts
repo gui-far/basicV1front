@@ -16,6 +16,7 @@ export interface KanbanStage {
   id: string
   label: string
   totalizerField?: string
+  allowRollback?: boolean
 }
 
 export interface PropertyBehaviors {

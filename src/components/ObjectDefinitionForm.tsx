@@ -125,7 +125,7 @@ export function ObjectDefinitionForm({
     setPropertyBehaviors(newBehaviors)
   }
 
-  const updateStage = (index: number, field: keyof KanbanStage, value: string | undefined) => {
+  const updateStage = (index: number, field: keyof KanbanStage, value: string | boolean | undefined) => {
     const newStages = [...stages]
     const oldId = newStages[index]
       .id
@@ -408,6 +408,22 @@ export function ObjectDefinitionForm({
                 <p className="text-xs text-gray-500 mt-1">
                   Select a Currency field to calculate Highest, Lowest, Total, and Average
                 </p>
+              </div>
+
+              <div className="mb-4">
+                <Label htmlFor={`stage-rollback-${index}`}>Rollback Stage?</Label>
+                <div className="flex items-center gap-2 mt-2">
+                  <input
+                    id={`stage-rollback-${index}`}
+                    type="checkbox"
+                    checked={stage.allowRollback !== false}
+                    onChange={(e) => updateStage(index, 'allowRollback', e.target.checked)}
+                    className="w-4 h-4"
+                  />
+                  <label htmlFor={`stage-rollback-${index}`} className="text-sm text-gray-600">
+                    Allow moving cards back to the previous stage
+                  </label>
+                </div>
               </div>
 
               <div>

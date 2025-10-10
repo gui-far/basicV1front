@@ -7,6 +7,7 @@ import { DynamicForm } from './DynamicForm'
 import { ObjectDefinition } from '@/services/objectDefinitionService'
 import { groupService, Group } from '@/services/groupService'
 import { userService, User } from '@/services/userService'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface CreateObjectDialogProps {
   isOpen: boolean
@@ -23,6 +24,7 @@ export function CreateObjectDialog({
   stageId,
   onCreate,
 }: CreateObjectDialogProps) {
+  const { user } = useAuth()
   const [properties, setProperties] = useState<Record<string, any>>({})
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState('')
@@ -198,24 +200,25 @@ export function CreateObjectDialog({
                   <div className="max-h-40 overflow-y-auto border rounded p-2 space-y-1">
                     {loadingData ? (
                       <div className="text-sm text-gray-500">Loading users...</div>
-                    ) : users.length === 0 ? (
-                      <div className="text-sm text-gray-500">No users available</div>
+                    ) : users.filter((u) => u.email !== user?.email).length === 0 ? (
+                      <div className="text-sm text-gray-500">No other users available</div>
                     ) : (
                       users
-                        .map((user) => (
+                        .filter((u) => u.email !== user?.email)
+                        .map((otherUser) => (
                           <div
-                            key={user.id}
+                            key={otherUser.id}
                             className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer"
-                            onClick={() => toggleUserSelection(user.id)}
+                            onClick={() => toggleUserSelection(otherUser.id)}
                           >
                             <input
                               type="checkbox"
                               checked={selectedUserIds
-                                .includes(user.id)}
-                              onChange={() => toggleUserSelection(user.id)}
+                                .includes(otherUser.id)}
+                              onChange={() => toggleUserSelection(otherUser.id)}
                               className="cursor-pointer"
                             />
-                            <span className="text-sm">{user.email}</span>
+                            <span className="text-sm">{otherUser.email}</span>
                           </div>
                         ))
                     )}

@@ -23,6 +23,7 @@ export default function ManageStagePermissionsPage() {
   const [objectDefinition, setObjectDefinition] = useState<ObjectDefinition | null>(null)
   const [groupAssignment, setGroupAssignment] = useState<ObjectDefinitionGroup | null>(null)
   const [permissions, setPermissions] = useState<GroupPermissions>({})
+  const [stageVisibility, setStageVisibility] = useState<{ [stageId: string]: 'visible' | 'invisible' }>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const { accessToken } = useAuth()
@@ -54,6 +55,17 @@ export default function ManageStagePermissionsPage() {
 
       setGroupAssignment(assignment)
       setPermissions(assignment.permissions || {})
+
+      // Initialize all stages as visible by default
+      const initialVisibility: { [stageId: string]: 'visible' | 'invisible' } = {}
+      definition
+        .definition
+        .kanban
+        .stages
+        .forEach((stage) => {
+          initialVisibility[stage.id] = 'visible'
+        })
+      setStageVisibility(initialVisibility)
     } catch (err) {
       console
         .error('Failed to fetch data:', err)
@@ -114,6 +126,13 @@ export default function ManageStagePermissionsPage() {
         ...prev[stageId],
         [propertyName]: value,
       },
+    }))
+  }
+
+  const handleStageVisibilityChange = (stageId: string, value: 'visible' | 'invisible') => {
+    setStageVisibility(prev => ({
+      ...prev,
+      [stageId]: value,
     }))
   }
 
@@ -214,6 +233,28 @@ export default function ManageStagePermissionsPage() {
                       <div className="overflow-x-auto">
                         <Table>
                           <TableHeader>
+                            <TableRow style={{ borderBottomWidth: '0px' }}>
+                              <TableHead style={{ borderBottomWidth: '0px' }}></TableHead>
+                              {stages
+                                .map((stage) => (
+                                  <TableHead key={stage.id} className="text-center" style={{ borderBottomWidth: '0px' }}>
+                                    <div className="flex items-center justify-center">
+                                      <Select
+                                        value={stageVisibility[stage.id] || 'visible'}
+                                        onValueChange={(value) => handleStageVisibilityChange(stage.id, value as 'visible' | 'invisible')}
+                                      >
+                                        <SelectTrigger className="w-40 h-8 text-xs justify-center">
+                                          <SelectValue className="text-center" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="visible" className="justify-center">Visible</SelectItem>
+                                          <SelectItem value="invisible" className="justify-center">Invisible</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  </TableHead>
+                                ))}
+                            </TableRow>
                             <TableRow>
                               <TableHead className="font-semibold">Property</TableHead>
                               {stages
@@ -243,16 +284,7 @@ export default function ManageStagePermissionsPage() {
                                       return (
                                         <TableCell key={stage.id} className="text-center">
                                           {initial === 'invisible' ? (
-                                            <div className="flex flex-col gap-1 items-center">
-                                              <span className="inline-block px-2 py-1 text-xs rounded bg-gray-200 text-gray-600">
-                                                Invisible (default)
-                                              </span>
-                                            </div>
-                                          ) : initial === 'visible' ? (
-                                            <div className="flex flex-col gap-1 items-center">
-                                              <span className="inline-block px-2 py-1 text-xs rounded bg-green-100 text-green-700">
-                                                Visible (default)
-                                              </span>
+                                            <div className="flex items-center justify-center">
                                               <Select
                                                 value={current}
                                                 onValueChange={(value) => {
@@ -263,20 +295,37 @@ export default function ManageStagePermissionsPage() {
                                                   )
                                                 }}
                                               >
-                                                <SelectTrigger className="w-32 h-8 text-xs">
+                                                <SelectTrigger className="w-40 h-8 text-xs justify-center">
                                                   <SelectValue placeholder="Select" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                  <SelectItem value="visible">Visible</SelectItem>
-                                                  <SelectItem value="invisible">Invisible</SelectItem>
+                                                  <SelectItem value="invisible" className="justify-center">Invisible (default)</SelectItem>
+                                                </SelectContent>
+                                              </Select>
+                                            </div>
+                                          ) : initial === 'visible' ? (
+                                            <div className="flex items-center justify-center">
+                                              <Select
+                                                value={current}
+                                                onValueChange={(value) => {
+                                                  handlePermissionChange(
+                                                    stage.id,
+                                                    property.name,
+                                                    value as 'editable' | 'visible' | 'invisible'
+                                                  )
+                                                }}
+                                              >
+                                                <SelectTrigger className="w-40 h-8 text-xs justify-center">
+                                                  <SelectValue placeholder="Select" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                  <SelectItem value="visible" className="justify-center">Visible (default)</SelectItem>
+                                                  <SelectItem value="invisible" className="justify-center">Invisible</SelectItem>
                                                 </SelectContent>
                                               </Select>
                                             </div>
                                           ) : initial === 'editable' ? (
-                                            <div className="flex flex-col gap-1 items-center">
-                                              <span className="inline-block px-2 py-1 text-xs rounded bg-blue-100 text-blue-700">
-                                                Editable (default)
-                                              </span>
+                                            <div className="flex items-center justify-center">
                                               <Select
                                                 value={current}
                                                 onValueChange={(value) => {
@@ -287,13 +336,13 @@ export default function ManageStagePermissionsPage() {
                                                   )
                                                 }}
                                               >
-                                                <SelectTrigger className="w-32 h-8 text-xs">
+                                                <SelectTrigger className="w-40 h-8 text-xs justify-center">
                                                   <SelectValue placeholder="Select" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                  <SelectItem value="editable">Editable</SelectItem>
-                                                  <SelectItem value="visible">Visible</SelectItem>
-                                                  <SelectItem value="invisible">Invisible</SelectItem>
+                                                  <SelectItem value="editable" className="justify-center">Editable (default)</SelectItem>
+                                                  <SelectItem value="visible" className="justify-center">Visible</SelectItem>
+                                                  <SelectItem value="invisible" className="justify-center">Invisible</SelectItem>
                                                 </SelectContent>
                                               </Select>
                                             </div>

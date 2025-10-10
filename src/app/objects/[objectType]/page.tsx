@@ -192,8 +192,8 @@ export default function ObjectsKanbanPage() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-gray-50 p-8">
-          <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-gray-50 p-4">
+          <div className="w-full px-4">
             <div className="text-center py-8 text-gray-500">Loading...</div>
           </div>
         </div>
@@ -204,8 +204,8 @@ export default function ObjectsKanbanPage() {
   if (!objectDefinition) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-gray-50 p-8">
-          <div className="max-w-7xl mx-auto">
+        <div className="min-h-screen bg-gray-50 p-4">
+          <div className="w-full px-4 max-w-4xl mx-auto">
             <Card>
               <CardContent className="py-8">
                 <div className="text-center text-red-600">
@@ -228,8 +228,8 @@ export default function ObjectsKanbanPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-7xl mx-auto space-y-6">
+      <div className="min-h-screen bg-gray-50 p-4">
+        <div className="w-full px-4 space-y-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">{objectDefinition.label}</h1>
