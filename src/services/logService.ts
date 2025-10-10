@@ -1,3 +1,5 @@
+import { authenticatedFetch } from '@/lib/apiInterceptor'
+
 const apiUrl = process
   .env
   .NEXT_PUBLIC_API_URL || 'http://localhost:3000'
@@ -39,7 +41,7 @@ class LogService {
   ): Promise<ListLogsResponse> {
     const url = `${this.baseUrl}/api/log?page=${page}&limit=${limit}&statusCode=403`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -67,7 +69,7 @@ class LogService {
   ): Promise<ListLogsResponse> {
     const url = `${this.baseUrl}/api/log?page=${page}&limit=${limit}&statusCodeMin=400&statusCodeMax=599&statusCodeExclude=403`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken}`,

@@ -1,3 +1,5 @@
+import { authenticatedFetch } from '@/lib/apiInterceptor'
+
 const apiUrl = process
   .env
   .NEXT_PUBLIC_API_URL || 'http://localhost:3000'
@@ -39,7 +41,7 @@ class EndpointService {
   async createEndpoint(data: CreateEndpointRequest, accessToken: string): Promise<Endpoint> {
     const url = `${this.baseUrl}/api/endpoint`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -66,7 +68,7 @@ class EndpointService {
   async deleteEndpoint(endpointId: string, accessToken: string): Promise<void> {
     const url = `${this.baseUrl}/api/endpoint/${endpointId}`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -85,7 +87,7 @@ class EndpointService {
   async addEndpointToGroup(data: AddEndpointToGroupRequest, accessToken: string): Promise<void> {
     const url = `${this.baseUrl}/api/group/${data.groupId}/endpoint/${data.endpointId}`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -104,7 +106,7 @@ class EndpointService {
   async removeEndpointFromGroup(data: RemoveEndpointFromGroupRequest, accessToken: string): Promise<void> {
     const url = `${this.baseUrl}/api/group/${data.groupId}/endpoint/${data.endpointId}`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -123,7 +125,7 @@ class EndpointService {
   async listEndpoints(accessToken: string): Promise<Endpoint[]> {
     const url = `${this.baseUrl}/api/endpoint`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken}`,

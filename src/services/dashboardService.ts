@@ -1,3 +1,5 @@
+import { authenticatedFetch } from '@/lib/apiInterceptor'
+
 const apiUrl = process
   .env
   .NEXT_PUBLIC_API_URL || 'http://localhost:3000'
@@ -35,7 +37,7 @@ class DashboardService {
   async getUserProfile(accessToken: string): Promise<UserProfile> {
     const url = `${this.baseUrl}/api/users/profile`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -59,7 +61,7 @@ class DashboardService {
   async getAnalytics(accessToken: string): Promise<Analytics> {
     const url = `${this.baseUrl}/api/analytics`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -83,7 +85,7 @@ class DashboardService {
   async getHealth(accessToken: string): Promise<Health> {
     const url = `${this.baseUrl}/api/health`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken}`,

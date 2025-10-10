@@ -1,3 +1,5 @@
+import { authenticatedFetch } from '@/lib/apiInterceptor'
+
 const apiUrl = process
   .env
   .NEXT_PUBLIC_API_URL || 'http://localhost:3000'
@@ -80,7 +82,7 @@ class ObjectDefinitionService {
   ): Promise<ObjectDefinition> {
     const url = `${this.baseUrl}/api/object-definition`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -117,7 +119,7 @@ class ObjectDefinitionService {
 
     const url = `${this.baseUrl}/api/object-definition?${queryParams}`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -142,7 +144,7 @@ class ObjectDefinitionService {
   ): Promise<ObjectDefinition> {
     const url = `${this.baseUrl}/api/object-definition/${id}`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -167,7 +169,7 @@ class ObjectDefinitionService {
   ): Promise<ObjectDefinition> {
     const url = `${this.baseUrl}/api/object-definition/type/${objectType}`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -193,7 +195,7 @@ class ObjectDefinitionService {
   ): Promise<ObjectDefinition> {
     const url = `${this.baseUrl}/api/object-definition/${id}`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

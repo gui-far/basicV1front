@@ -1,3 +1,5 @@
+import { authenticatedFetch } from '@/lib/apiInterceptor'
+
 const apiUrl = process
   .env
   .NEXT_PUBLIC_API_URL || 'http://localhost:3000'
@@ -57,7 +59,7 @@ class GroupService {
   async createGroup(data: CreateGroupRequest, accessToken: string): Promise<Group> {
     const url = `${this.baseUrl}/api/group`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -84,7 +86,7 @@ class GroupService {
   async deleteGroup(groupId: string, accessToken: string): Promise<void> {
     const url = `${this.baseUrl}/api/group/${groupId}`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -103,7 +105,7 @@ class GroupService {
   async addUserToGroup(data: AddUserToGroupRequest, accessToken: string): Promise<void> {
     const url = `${this.baseUrl}/api/group/${data.groupId}/user/${data.userId}`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -122,7 +124,7 @@ class GroupService {
   async removeUserFromGroup(data: RemoveUserFromGroupRequest, accessToken: string): Promise<void> {
     const url = `${this.baseUrl}/api/group/${data.groupId}/user/${data.userId}`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -141,7 +143,7 @@ class GroupService {
   async listGroups(accessToken: string): Promise<Group[]> {
     const url = `${this.baseUrl}/api/group`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -165,7 +167,7 @@ class GroupService {
   async getGroupDetails(groupId: string, accessToken: string): Promise<GroupDetails> {
     const url = `${this.baseUrl}/api/group/${groupId}`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -189,7 +191,7 @@ class GroupService {
   async updateGroup(groupId: string, data: UpdateGroupRequest, accessToken: string): Promise<Group> {
     const url = `${this.baseUrl}/api/group/${groupId}`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

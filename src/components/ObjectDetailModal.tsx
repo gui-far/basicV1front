@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog'
 import { Button } from './ui/button'
 import { DynamicForm } from './DynamicForm'
+import { ObjectHistorySheet } from './ObjectHistorySheet'
 import { GenericObject } from '@/services/genericObjectService'
 import { ObjectDefinition } from '@/services/objectDefinitionService'
 
@@ -26,6 +27,7 @@ export function ObjectDetailModal({
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false)
 
   useEffect(() => {
     if (object) {
@@ -41,7 +43,21 @@ export function ObjectDetailModal({
     setIsSaving(true)
 
     try {
-      await onSave(object.id, formValues)
+      const propertyBehaviors = objectDefinition
+        .definition
+        .kanban
+        .propertyBehaviors[object.currentStageId] || {}
+
+      const editableProperties: Record<string, any> = {}
+      Object
+        .keys(formValues)
+        .forEach((key) => {
+          if (propertyBehaviors[key] === 'editable' || !propertyBehaviors[key]) {
+            editableProperties[key] = formValues[key]
+          }
+        })
+
+      await onSave(object.id, editableProperties)
       onClose()
     } catch (error: any) {
       const errorMessage = error
@@ -120,14 +136,24 @@ export function ObjectDetailModal({
         </div>
 
         <DialogFooter className="flex justify-between">
-          <Button
-            variant="destructive"
-            onClick={handleDelete}
-            disabled={isDeleting || isSaving}
-            className="cursor-pointer"
-          >
-            {isDeleting ? 'Deleting...' : 'Delete'}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting || isSaving}
+              className="cursor-pointer"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsHistoryOpen(true)}
+              disabled={isSaving || isDeleting}
+              className="cursor-pointer"
+            >
+              View History
+            </Button>
+          </div>
 
           <div className="flex gap-2">
             <Button
@@ -147,6 +173,12 @@ export function ObjectDetailModal({
             </Button>
           </div>
         </DialogFooter>
+
+        <ObjectHistorySheet
+          objectId={object.id}
+          isOpen={isHistoryOpen}
+          onClose={() => setIsHistoryOpen(false)}
+        />
       </DialogContent>
     </Dialog>
   )

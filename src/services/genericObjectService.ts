@@ -1,3 +1,5 @@
+import { authenticatedFetch } from '@/lib/apiInterceptor'
+
 const apiUrl = process
   .env
   .NEXT_PUBLIC_API_URL || 'http://localhost:3000'
@@ -43,6 +45,21 @@ export interface ListGenericObjectsResponse {
   totalPages: number
 }
 
+export interface ObjectHistoryEntry {
+  id: string
+  objectId: string
+  previousStageId: string | null
+  newStageId: string
+  changedById: string | null
+  changeType: string
+  changes: Record<string, any> | null
+  createdAt: string
+  changedBy: {
+    id: string
+    email: string
+  } | null
+}
+
 class GenericObjectService {
   private baseUrl: string
 
@@ -56,7 +73,7 @@ class GenericObjectService {
   ): Promise<GenericObject> {
     const url = `${this.baseUrl}/api/object`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -85,7 +102,7 @@ class GenericObjectService {
   ): Promise<GenericObject> {
     const url = `${this.baseUrl}/api/object/${id}`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -114,7 +131,7 @@ class GenericObjectService {
   ): Promise<GenericObject> {
     const url = `${this.baseUrl}/api/object/${id}/stage`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -139,7 +156,7 @@ class GenericObjectService {
   async deleteObject(id: string, accessToken: string): Promise<void> {
     const url = `${this.baseUrl}/api/object/${id}`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -161,7 +178,7 @@ class GenericObjectService {
   ): Promise<GenericObjectWithBehavior> {
     const url = `${this.baseUrl}/api/object/${id}`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -205,7 +222,7 @@ class GenericObjectService {
 
     const url = `${this.baseUrl}/api/object?${queryParams}`
 
-    const response = await fetch(url, {
+    const response = await authenticatedFetch(url, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -218,6 +235,31 @@ class GenericObjectService {
         .catch(() => ({ message: 'Failed to fetch objects' }))
 
       throw new Error(errorData.message || 'Failed to fetch objects')
+    }
+
+    return await response
+      .json()
+  }
+
+  async getObjectHistory(
+    objectId: string,
+    accessToken: string,
+  ): Promise<ObjectHistoryEntry[]> {
+    const url = `${this.baseUrl}/api/object/${objectId}/history`
+
+    const response = await authenticatedFetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: 'Failed to fetch object history' }))
+
+      throw new Error(errorData.message || 'Failed to fetch object history')
     }
 
     return await response

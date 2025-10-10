@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { authService, SignUpRequest, SignInRequest } from '@/services/authService'
 import { useRouter } from 'next/navigation'
+import { setUnauthorizedCallback } from '@/lib/apiInterceptor'
 
 interface User {
   userId: string
@@ -50,12 +51,61 @@ function decodeToken(token: string): User | null {
   }
 }
 
+function isTokenExpired(token: string): boolean {
+  try {
+    const base64Url = token
+      .split('.')[1]
+    const base64 = base64Url
+      .replace(/-/g, '+')
+      .replace(/_/g, '/')
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(''),
+    )
+    const payload = JSON
+      .parse(jsonPayload)
+
+    if (!payload.exp) {
+      return false
+    }
+
+    const currentTime = Math
+      .floor(Date.now() / 1000)
+    return payload.exp < currentTime
+  } catch (error) {
+    console
+      .error('Error checking token expiration:', error)
+    return true
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [refreshToken, setRefreshToken] = useState<string | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+
+  const handleUnauthorized = () => {
+    setAccessToken(null)
+    setRefreshToken(null)
+    setUser(null)
+
+    localStorage
+      .removeItem('accessToken')
+
+    localStorage
+      .removeItem('refreshToken')
+
+    router
+      .push('/signin')
+  }
+
+  useEffect(() => {
+    setUnauthorizedCallback(handleUnauthorized)
+  }, [])
 
   useEffect(() => {
     const storedAccessToken = localStorage
@@ -65,6 +115,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .getItem('refreshToken')
 
     if (storedAccessToken) {
+      if (isTokenExpired(storedAccessToken)) {
+        localStorage
+          .removeItem('accessToken')
+        localStorage
+          .removeItem('refreshToken')
+        setIsLoading(false)
+        return
+      }
+
       setAccessToken(storedAccessToken)
       const decodedUser = decodeToken(storedAccessToken)
       setUser(decodedUser)
