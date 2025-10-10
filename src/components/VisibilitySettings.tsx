@@ -75,24 +75,26 @@ export function VisibilitySettings({
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="visibility" className="text-sm font-medium">
-          Visibility
-        </Label>
-        <Select value={visibility} onValueChange={(value: any) => onVisibilityChange(value)}>
-          <SelectTrigger id="visibility">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="private">🔒 Private (Only me)</SelectItem>
-            <SelectItem value="public">🌐 Public (Everyone)</SelectItem>
-            <SelectItem value="shared">👥 Shared (Specific groups/users)</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      {visibility !== 'shared' && (
+        <div className="space-y-2">
+          <Label htmlFor="visibility" className="text-sm font-medium">
+            Visibility
+          </Label>
+          <Select value={visibility} onValueChange={(value: any) => onVisibilityChange(value)}>
+            <SelectTrigger id="visibility">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="private">🔒 Private (Only me)</SelectItem>
+              <SelectItem value="public">🌐 Public (Everyone)</SelectItem>
+              <SelectItem value="shared">👥 Shared (Specific groups/users)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       {visibility === 'shared' && (
-        <div className="space-y-4 pl-4 border-l-2 border-gray-200">
+        <div className="space-y-4">
           <div className="space-y-2">
             <Label className="text-sm font-medium">Share with Groups</Label>
             <div className="max-h-40 overflow-y-auto border rounded p-2 space-y-1">

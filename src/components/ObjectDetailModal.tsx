@@ -4,6 +4,7 @@ import { Button } from './ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { DynamicForm } from './DynamicForm'
 import { ObjectHistorySheet } from './ObjectHistorySheet'
+import { VisibilitySettings } from './VisibilitySettings'
 import { GenericObject } from '@/services/genericObjectService'
 import { ObjectDefinition } from '@/services/objectDefinitionService'
 import { useAuth } from '@/contexts/AuthContext'
@@ -34,6 +35,10 @@ export function ObjectDetailModal({
   const [isDeleting, setIsDeleting] = useState(false)
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const [currentVisibility, setCurrentVisibility] = useState<'private' | 'public' | 'shared'>('private')
+  const [isConfigureDialogOpen, setIsConfigureDialogOpen] = useState(false)
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([])
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([])
+  const [isSavingSharing, setIsSavingSharing] = useState(false)
 
   useEffect(() => {
     if (object) {
@@ -109,8 +114,8 @@ export function ObjectDetailModal({
     const newVisibility = value as 'private' | 'public' | 'shared'
 
     if (newVisibility === 'shared') {
-      alert('Shared visibility is not yet supported in this simplified version. Please use Private or Public.')
-      setCurrentVisibility((object.visibility as 'private' | 'public' | 'shared') || 'private')
+      setCurrentVisibility(newVisibility)
+      setIsConfigureDialogOpen(true)
       return
     }
 
@@ -121,6 +126,32 @@ export function ObjectDetailModal({
       const errorMessage = error.message || 'Failed to update visibility'
       setErrors({ _general: errorMessage })
       setCurrentVisibility((object.visibility as 'private' | 'public' | 'shared') || 'private')
+    }
+  }
+
+  const handleConfigureSharing = () => {
+    setIsConfigureDialogOpen(true)
+  }
+
+  const handleSaveSharing = async () => {
+    if (!object) return
+
+    if (selectedGroupIds.length === 0 && selectedUserIds.length === 0) {
+      setErrors({ _general: 'Please select at least one group or user to share with' })
+      return
+    }
+
+    setErrors({})
+    setIsSavingSharing(true)
+
+    try {
+      await onUpdateSharing(object.id, 'shared', selectedGroupIds, selectedUserIds)
+      setIsConfigureDialogOpen(false)
+    } catch (error: any) {
+      const errorMessage = error.message || 'Failed to update sharing settings'
+      setErrors({ _general: errorMessage })
+    } finally {
+      setIsSavingSharing(false)
     }
   }
 
@@ -136,28 +167,43 @@ export function ObjectDetailModal({
   const canChangeVisibility = isOwner || user?.isAdmin
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+    <>
+      <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">
             {objectDefinition.label} Details
           </DialogTitle>
           {currentStage && (
-            <div className="flex items-center justify-between text-sm text-gray-500">
-              <div>
-                Current Stage: <span className="font-medium">{currentStage.label}</span>
+            <>
+              <div className="flex items-center justify-between text-sm text-gray-500">
+                <div>
+                  Current Stage: <span className="font-medium">{currentStage.label}</span>
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                  <Select value={currentVisibility} onValueChange={handleVisibilityChange} disabled={!canChangeVisibility}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="private">🔒 Private</SelectItem>
+                      <SelectItem value="public">🌐 Public</SelectItem>
+                      <SelectItem value="shared">👥 Shared</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {currentVisibility === 'shared' && canChangeVisibility && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleConfigureSharing}
+                      className="w-[180px] h-8 text-xs"
+                    >
+                      Configure Sharing
+                    </Button>
+                  )}
+                </div>
               </div>
-              <Select value={currentVisibility} onValueChange={handleVisibilityChange} disabled={!canChangeVisibility}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="private">🔒 Private</SelectItem>
-                  <SelectItem value="public">🌐 Public</SelectItem>
-                  <SelectItem value="shared">👥 Shared</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            </>
           )}
         </DialogHeader>
 
@@ -225,5 +271,51 @@ export function ObjectDetailModal({
         />
       </DialogContent>
     </Dialog>
+
+      <Dialog open={isConfigureDialogOpen} onOpenChange={(open) => !open && setIsConfigureDialogOpen(false)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Configure Sharing Settings</DialogTitle>
+          </DialogHeader>
+
+          <div className="py-4">
+            {errors._general && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+                {errors._general}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <VisibilitySettings
+                visibility="shared"
+                selectedGroupIds={selectedGroupIds}
+                selectedUserIds={selectedUserIds}
+                onVisibilityChange={() => {}}
+                onGroupsChange={setSelectedGroupIds}
+                onUsersChange={setSelectedUserIds}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsConfigureDialogOpen(false)}
+              disabled={isSavingSharing}
+              className="cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveSharing}
+              disabled={isSavingSharing}
+              className="cursor-pointer"
+            >
+              {isSavingSharing ? 'Saving...' : 'Save Sharing Settings'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
