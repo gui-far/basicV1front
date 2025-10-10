@@ -45,9 +45,30 @@ export function ObjectCard({ object, objectDefinition, onClick }: ObjectCardProp
     })
     .sort((a, b) => (a.summaryOrder || 0) - (b.summaryOrder || 0))
 
+  const visibility = (object as any).visibility || 'private'
+
+  const getVisibilityIcon = () => {
+    switch (visibility) {
+      case 'public':
+        return { icon: '🌐', label: 'Public' }
+      case 'shared':
+        return { icon: '👥', label: 'Shared' }
+      default:
+        return { icon: '🔒', label: 'Private' }
+    }
+  }
+
+  const visibilityInfo = getVisibilityIcon()
+
   return (
     <div ref={setNodeRef} style={style} {...attributes}>
       <Card className="mb-2 hover:shadow-md transition-shadow relative">
+        <div
+          className="absolute top-2 left-2 text-xs bg-gray-100 px-2 py-1 rounded"
+          title={visibilityInfo.label}
+        >
+          {visibilityInfo.icon}
+        </div>
         <div
           className="absolute top-2 right-2 p-1 cursor-grab active:cursor-grabbing hover:bg-gray-100 rounded"
           {...listeners}
@@ -66,7 +87,7 @@ export function ObjectCard({ object, objectDefinition, onClick }: ObjectCardProp
             />
           </svg>
         </div>
-        <CardContent className="p-3 cursor-pointer" onClick={onClick}>
+        <CardContent className="p-3 pt-8 cursor-pointer" onClick={onClick}>
           <div className="space-y-1 pr-6">
             {propertiesWithSummaryOrder
               .map((prop) => {

@@ -36,9 +36,9 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
                   {isLast ? (
                     <BreadcrumbPage>{item.label}</BreadcrumbPage>
                   ) : item.href ? (
-                    <Link href={item.href} passHref legacyBehavior>
-                      <BreadcrumbLink>{item.label}</BreadcrumbLink>
-                    </Link>
+                    <BreadcrumbLink asChild>
+                      <Link href={item.href}>{item.label}</Link>
+                    </BreadcrumbLink>
                   ) : (
                     <span>{item.label}</span>
                   )}

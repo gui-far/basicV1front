@@ -11,6 +11,7 @@ export interface GenericObject {
   currentStageId: string
   properties: Record<string, any>
   createdById: string | null
+  visibility: string
   createdAt: string
   updatedAt: string
 }
@@ -28,6 +29,9 @@ export interface CreateGenericObjectRequest {
   objectType: string
   initialStageId: string
   properties: Record<string, any>
+  visibility?: string
+  sharedWithGroupIds?: string[]
+  sharedWithUserIds?: string[]
 }
 
 export interface UpdateGenericObjectRequest {
@@ -233,6 +237,35 @@ class GenericObjectService {
 
     if (!response.ok) {
       await handleApiError(response, 'Failed to fetch object history')
+    }
+
+    return await response
+      .json()
+  }
+
+  async updateObjectSharing(
+    objectId: string,
+    data: {
+      visibility: string
+      sharedWithGroupIds?: string[]
+      sharedWithUserIds?: string[]
+    },
+    accessToken: string,
+  ): Promise<GenericObject> {
+    const url = `${this.baseUrl}/api/object/${objectId}/sharing`
+
+    const response = await authenticatedFetch(url, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON
+        .stringify(data),
+    })
+
+    if (!response.ok) {
+      await handleApiError(response, 'Failed to update object sharing')
     }
 
     return await response

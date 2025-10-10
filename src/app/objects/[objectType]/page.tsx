@@ -107,7 +107,13 @@ export default function ObjectsKanbanPage() {
     }
   }
 
-  const handleCreateObject = async (properties: Record<string, any>, stageId: string) => {
+  const handleCreateObject = async (
+    properties: Record<string, any>,
+    stageId: string,
+    visibility?: string,
+    sharedWithGroupIds?: string[],
+    sharedWithUserIds?: string[],
+  ) => {
     try {
       await genericObjectService
         .createObject(
@@ -115,6 +121,9 @@ export default function ObjectsKanbanPage() {
             objectType,
             properties,
             initialStageId: stageId,
+            visibility,
+            sharedWithGroupIds,
+            sharedWithUserIds,
           },
           accessToken!,
         )
@@ -125,6 +134,39 @@ export default function ObjectsKanbanPage() {
       })
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to create object'
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: errorMessage,
+      })
+      throw new Error(errorMessage)
+    }
+  }
+
+  const handleUpdateSharing = async (
+    objectId: string,
+    visibility: string,
+    sharedWithGroupIds?: string[],
+    sharedWithUserIds?: string[],
+  ) => {
+    try {
+      await genericObjectService
+        .updateObjectSharing(
+          objectId,
+          {
+            visibility,
+            sharedWithGroupIds,
+            sharedWithUserIds,
+          },
+          accessToken!,
+        )
+      await loadData()
+      toast({
+        title: 'Success',
+        description: 'Visibility updated successfully',
+      })
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to update visibility'
       toast({
         variant: 'destructive',
         title: 'Error',
@@ -212,6 +254,7 @@ export default function ObjectsKanbanPage() {
           onClose={handleCloseModal}
           onSave={handleSaveObject}
           onDelete={handleDeleteObject}
+          onUpdateSharing={handleUpdateSharing}
         />
       </div>
     </ProtectedRoute>
