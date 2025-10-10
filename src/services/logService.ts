@@ -12,6 +12,7 @@ export interface LogEntity {
   method: string | null
   path: string | null
   statusCode: number | null
+  payload: any | null
   createdAt: string
   user?: {
     id: string

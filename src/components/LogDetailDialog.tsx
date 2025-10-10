@@ -94,6 +94,15 @@ export function LogDetailDialog({ log, open, onClose }: LogDetailDialogProps) {
             </p>
           </div>
 
+          {log.payload && (
+            <div>
+              <p className="text-xs font-semibold text-gray-500 mb-1">Request Payload</p>
+              <pre className="text-xs font-mono bg-blue-50 text-blue-900 p-3 rounded border overflow-x-auto whitespace-pre-wrap">
+                {JSON.stringify(log.payload, null, 2)}
+              </pre>
+            </div>
+          )}
+
           {log.stack && (
             <div>
               <p className="text-xs font-semibold text-gray-500 mb-1">Stack Trace</p>
