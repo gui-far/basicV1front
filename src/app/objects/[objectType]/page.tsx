@@ -150,7 +150,7 @@ export default function ObjectsKanbanPage() {
     sharedWithUserIds?: string[],
   ) => {
     try {
-      await genericObjectService
+      const updatedObject = await genericObjectService
         .updateObjectSharing(
           objectId,
           {
@@ -160,7 +160,20 @@ export default function ObjectsKanbanPage() {
           },
           accessToken!,
         )
-      await loadData()
+
+      // Update the objects list without reloading
+      setObjects((prevObjects) =>
+        prevObjects
+          .map((obj) =>
+            obj.id === objectId ? { ...obj, visibility: updatedObject.visibility } : obj
+          )
+      )
+
+      // Update the selected object if it's the one being updated
+      if (selectedObject?.id === objectId) {
+        setSelectedObject({ ...selectedObject, visibility: updatedObject.visibility })
+      }
+
       toast({
         title: 'Success',
         description: 'Visibility updated successfully',
