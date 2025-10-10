@@ -1,4 +1,5 @@
 import { authenticatedFetch } from '@/lib/apiInterceptor'
+import { handleApiError } from '@/lib/errorFormatter'
 
 const apiUrl = process
   .env
@@ -84,11 +85,7 @@ class GenericObjectService {
     })
 
     if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({ message: 'Failed to create object' }))
-
-      throw new Error(errorData.message || 'Failed to create object')
+      await handleApiError(response, 'Failed to create object')
     }
 
     return await response
@@ -113,11 +110,7 @@ class GenericObjectService {
     })
 
     if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({ message: 'Failed to update object' }))
-
-      throw new Error(errorData.message || 'Failed to update object')
+      await handleApiError(response, 'Failed to update object')
     }
 
     return await response
@@ -142,11 +135,7 @@ class GenericObjectService {
     })
 
     if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({ message: 'Failed to update object stage' }))
-
-      throw new Error(errorData.message || 'Failed to update object stage')
+      await handleApiError(response, 'Failed to update object stage')
     }
 
     return await response
@@ -164,11 +153,7 @@ class GenericObjectService {
     })
 
     if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({ message: 'Failed to delete object' }))
-
-      throw new Error(errorData.message || 'Failed to delete object')
+      await handleApiError(response, 'Failed to delete object')
     }
   }
 
@@ -186,11 +171,7 @@ class GenericObjectService {
     })
 
     if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({ message: 'Failed to fetch object' }))
-
-      throw new Error(errorData.message || 'Failed to fetch object')
+      await handleApiError(response, 'Failed to fetch object')
     }
 
     return await response
@@ -230,11 +211,7 @@ class GenericObjectService {
     })
 
     if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({ message: 'Failed to fetch objects' }))
-
-      throw new Error(errorData.message || 'Failed to fetch objects')
+      await handleApiError(response, 'Failed to fetch objects')
     }
 
     return await response
@@ -255,11 +232,7 @@ class GenericObjectService {
     })
 
     if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({ message: 'Failed to fetch object history' }))
-
-      throw new Error(errorData.message || 'Failed to fetch object history')
+      await handleApiError(response, 'Failed to fetch object history')
     }
 
     return await response

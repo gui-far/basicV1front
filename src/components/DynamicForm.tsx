@@ -8,6 +8,7 @@ interface DynamicFormProps {
   onChange: (values: Record<string, any>) => void
   errors?: Record<string, string>
   mode: 'create' | 'edit'
+  propertyBehaviors?: Record<string, 'editable' | 'visible' | 'invisible'>
 }
 
 export function DynamicForm({
@@ -17,11 +18,14 @@ export function DynamicForm({
   onChange,
   errors = {},
   mode,
+  propertyBehaviors: customBehaviors,
 }: DynamicFormProps) {
-  const propertyBehaviors = definition
+  const defaultBehaviors = definition
     .definition
     .kanban
     .propertyBehaviors[currentStageId] || {}
+
+  const propertyBehaviors = customBehaviors || defaultBehaviors
 
   const handleFieldChange = (propertyName: string, value: any) => {
     onChange({

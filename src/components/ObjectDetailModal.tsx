@@ -43,7 +43,7 @@ export function ObjectDetailModal({
     setIsSaving(true)
 
     try {
-      const propertyBehaviors = objectDefinition
+      const propertyBehaviors = (object as any).propertyBehaviors || objectDefinition
         .definition
         .kanban
         .propertyBehaviors[object.currentStageId] || {}
@@ -132,6 +132,7 @@ export function ObjectDetailModal({
             onChange={setFormValues}
             errors={errors}
             mode="edit"
+            propertyBehaviors={(object as any).propertyBehaviors}
           />
         </div>
 

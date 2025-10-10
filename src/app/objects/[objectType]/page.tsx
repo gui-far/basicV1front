@@ -12,12 +12,14 @@ import { KanbanBoard } from '@/components/KanbanBoard'
 import { ObjectDetailModal } from '@/components/ObjectDetailModal'
 import { GenericObject, genericObjectService } from '@/services/genericObjectService'
 import { ObjectDefinition, objectDefinitionService } from '@/services/objectDefinitionService'
+import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 
 export default function ObjectsKanbanPage() {
   const { accessToken } = useAuth()
   const router = useRouter()
   const params = useParams()
+  const { toast } = useToast()
   const objectType = params
     .objectType as string
 
@@ -47,7 +49,13 @@ export default function ObjectsKanbanPage() {
         .listObjects({ objectType }, accessToken!)
       setObjects(response.objects)
     } catch (err: any) {
-      setError(err.message || 'Failed to load data')
+      const errorMessage = err.message || 'Failed to load data'
+      setError(errorMessage)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: errorMessage,
+      })
     } finally {
       setLoading(false)
     }
@@ -89,7 +97,13 @@ export default function ObjectsKanbanPage() {
         .updateObjectStage(objectId, { newStageId }, accessToken!)
       await loadData()
     } catch (err: any) {
-      setError(err.message || 'Failed to update object stage')
+      const errorMessage = err.message || 'Failed to update object stage'
+      setError(errorMessage)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: errorMessage,
+      })
     }
   }
 
@@ -105,8 +119,18 @@ export default function ObjectsKanbanPage() {
           accessToken!,
         )
       await loadData()
+      toast({
+        title: 'Success',
+        description: 'Object created successfully',
+      })
     } catch (err: any) {
-      throw new Error(err.message || 'Failed to create object')
+      const errorMessage = err.message || 'Failed to create object'
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: errorMessage,
+      })
+      throw new Error(errorMessage)
     }
   }
 

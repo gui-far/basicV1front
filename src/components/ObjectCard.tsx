@@ -30,10 +30,19 @@ export function ObjectCard({ object, objectDefinition, onClick }: ObjectCardProp
     return String(value)
   }
 
+  const propertyBehaviors = (object as any).propertyBehaviors || {}
+
   const propertiesWithSummaryOrder = objectDefinition
     .definition
     .properties
-    .filter((prop) => prop.summaryOrder !== undefined && prop.summaryOrder !== null)
+    .filter((prop) => {
+      if (prop.summaryOrder === undefined || prop.summaryOrder === null) {
+        return false
+      }
+
+      const behavior = propertyBehaviors[prop.name]
+      return behavior !== 'invisible'
+    })
     .sort((a, b) => (a.summaryOrder || 0) - (b.summaryOrder || 0))
 
   return (
