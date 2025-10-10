@@ -89,6 +89,30 @@ class LogService {
 
     return responseData
   }
+
+  async getLogById(logId: string, accessToken: string): Promise<LogEntity> {
+    const url = `${this.baseUrl}/api/log/${logId}`
+
+    const response = await authenticatedFetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    })
+
+    if (!response.ok) {
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: 'Failed to fetch log details' }))
+
+      throw new Error(errorData.message || 'Failed to fetch log details')
+    }
+
+    const responseData = await response
+      .json()
+
+    return responseData
+  }
 }
 
 export const logService = new LogService()

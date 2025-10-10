@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { DataCard } from '@/components/DataCard'
 import { DataTableCard } from '@/components/DataTableCard'
+import { LogDetailDialog } from '@/components/LogDetailDialog'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { dashboardService, UserProfile, Analytics, Health } from '@/services/dashboardService'
@@ -37,6 +38,10 @@ export default function DashboardPage() {
   const [generalLogsTotalPages, setGeneralLogsTotalPages] = useState(0)
   const [generalLogsLoading, setGeneralLogsLoading] = useState(true)
   const [generalLogsError, setGeneralLogsError] = useState<string | null>(null)
+
+  const [selectedLog, setSelectedLog] = useState<LogEntity | null>(null)
+  const [logDialogOpen, setLogDialogOpen] = useState(false)
+  const [logDetailLoading, setLogDetailLoading] = useState(false)
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -183,6 +188,30 @@ export default function DashboardPage() {
     return text.substring(0, maxLength) + '...'
   }
 
+  const handleLogClick = async (logId: string) => {
+    if (!accessToken) return
+
+    setLogDetailLoading(true)
+    setLogDialogOpen(true)
+
+    try {
+      const logDetails = await logService
+        .getLogById(logId, accessToken)
+
+      setSelectedLog(logDetails)
+    } catch (error: any) {
+      console
+        .error('Failed to fetch log details:', error)
+    } finally {
+      setLogDetailLoading(false)
+    }
+  }
+
+  const handleCloseDialog = () => {
+    setLogDialogOpen(false)
+    setSelectedLog(null)
+  }
+
   const renderLogTable = (logs: LogEntity[]) => (
     <div className="overflow-x-auto">
       <Table>
@@ -199,7 +228,11 @@ export default function DashboardPage() {
         <TableBody>
           {logs
             .map((log) => (
-            <TableRow key={log.id}>
+            <TableRow
+              key={log.id}
+              onClick={() => handleLogClick(log.id)}
+              className="cursor-pointer hover:bg-gray-50 transition-colors"
+            >
               <TableCell className="text-xs">{formatDateTime(log.createdAt)}</TableCell>
               <TableCell>
                 <span className={`text-xs font-medium px-2 py-1 rounded ${
@@ -458,6 +491,12 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </div>
+
+        <LogDetailDialog
+          log={selectedLog}
+          open={logDialogOpen}
+          onClose={handleCloseDialog}
+        />
       </div>
     </ProtectedRoute>
   )
