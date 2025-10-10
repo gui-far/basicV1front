@@ -74,86 +74,117 @@ export default function ObjectDefinitionsPage() {
       [stageId: string]: { [propertyName: string]: 'editable' | 'visible' | 'invisible' }
     }
   }) => {
-    if (dialogMode === 'create') {
-      await objectDefinitionService
-        .createObjectDefinition(
-          {
-            objectType: data.objectType,
-            label: data.label,
-            properties: data.properties,
-            kanban: {
-              stages: data.stages,
-              propertyBehaviors: data.propertyBehaviors,
+    try {
+      if (dialogMode === 'create') {
+        await objectDefinitionService
+          .createObjectDefinition(
+            {
+              objectType: data.objectType,
+              label: data.label,
+              properties: data.properties,
+              kanban: {
+                stages: data.stages,
+                propertyBehaviors: data.propertyBehaviors,
+              },
+              isActive: true,
             },
-            isActive: true,
-          },
-          accessToken!,
-        )
-    } else {
-      await objectDefinitionService
-        .updateObjectDefinition(
-          selectedDefinition!.id,
-          {
-            label: data.label,
-            properties: data.properties,
-            kanban: {
-              stages: data.stages,
-              propertyBehaviors: data.propertyBehaviors,
+            accessToken!,
+          )
+      } else {
+        await objectDefinitionService
+          .updateObjectDefinition(
+            selectedDefinition!.id,
+            {
+              label: data.label,
+              properties: data.properties,
+              kanban: {
+                stages: data.stages,
+                propertyBehaviors: data.propertyBehaviors,
+              },
             },
-          },
-          accessToken!,
-        )
-    }
+            accessToken!,
+          )
+      }
 
-    handleCloseDialog()
-    await loadObjectDefinitions()
+      handleCloseDialog()
+      await loadObjectDefinitions()
+    } catch (err: any) {
+      throw err
+    }
   }
 
   return (
     <ProtectedRoute>
-      <div className="container mx-auto p-6">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-2xl">Object Definitions</CardTitle>
-                <Breadcrumbs
-                  items={[
-                    { label: 'Dashboard', href: '/dashboard' },
-                    { label: 'Object Definitions' },
-                  ]}
-                />
-                <CardDescription className="mt-2">
-                  Manage dynamic object types and their Kanban workflows
-                </CardDescription>
-              </div>
-              <div className="flex gap-2">
-                <Link href="/dashboard">
-                  <Button variant="outline" className="cursor-pointer">
-                    Back to Dashboard
-                  </Button>
-                </Link>
+      <div className="min-h-screen bg-gray-50 p-8">
+        <div className="max-w-6xl mx-auto space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Object Definitions</h1>
+              <Breadcrumbs
+                items={[
+                  { label: 'Dashboard', href: '/dashboard' },
+                  { label: 'Object Definitions' },
+                ]}
+              />
+            </div>
+            <Link href="/dashboard" className="cursor-pointer">
+              <Button variant="outline" className="cursor-pointer">Back to Dashboard</Button>
+            </Link>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Existing Object Definitions</CardTitle>
+                  <CardDescription>
+                    {loading
+                      ? 'Loading...'
+                      : error
+                      ? 'Error loading data'
+                      : objectDefinitions.length === 0
+                      ? 'No object definitions found. Create one to get started.'
+                      : 'Manage your object definitions below'}
+                  </CardDescription>
+                </div>
                 {user?.isAdmin && (
                   <Button onClick={handleCreateNew} className="cursor-pointer">
                     Create Object
                   </Button>
                 )}
               </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">
-                {error}
-              </div>
-            )}
-
+            </CardHeader>
+            <CardContent>
             {loading ? (
-              <div className="text-center py-8 text-gray-500">Loading...</div>
-            ) : objectDefinitions.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                No object definitions found. Create one to get started.
+              <div className="space-y-3">
+                <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
               </div>
+            ) : error ? (
+              <div className="flex items-start gap-3 p-4 rounded-lg border-yellow-200 bg-yellow-50">
+                <svg
+                  className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-yellow-800">Unable to load data</p>
+                  <p className="text-xs text-yellow-700 mt-1">{error}</p>
+                </div>
+              </div>
+            ) : objectDefinitions.length === 0 ? (
+              <p className="text-sm text-gray-500 text-center py-8">
+                No object definitions found. Create one to get started.
+              </p>
             ) : (
               <Table>
                 <TableHeader>
@@ -237,44 +268,45 @@ export default function ObjectDefinitionsPage() {
                     ))}
                 </TableBody>
               </Table>
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </CardContent>
+          </Card>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                {dialogMode === 'create' ? 'Create Object Definition' : 'Edit Object Definition'}
-              </DialogTitle>
-            </DialogHeader>
-            <ObjectDefinitionForm
-              mode={dialogMode}
-              initialData={
-                selectedDefinition
-                  ? {
-                      objectType: selectedDefinition.objectType,
-                      label: selectedDefinition.label,
-                      properties: selectedDefinition
-                        .definition
-                        .properties,
-                      stages: selectedDefinition
-                        .definition
-                        .kanban
-                        .stages,
-                      propertyBehaviors: selectedDefinition
-                        .definition
-                        .kanban
-                        .propertyBehaviors,
-                    }
-                  : undefined
-              }
-              onSubmit={handleSubmit}
-              onCancel={handleCloseDialog}
-              submitLabel={dialogMode === 'create' ? 'Create Object Definition' : 'Save Changes'}
-            />
-          </DialogContent>
-        </Dialog>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {dialogMode === 'create' ? 'Create Object Definition' : 'Edit Object Definition'}
+                </DialogTitle>
+              </DialogHeader>
+              <ObjectDefinitionForm
+                mode={dialogMode}
+                initialData={
+                  selectedDefinition
+                    ? {
+                        objectType: selectedDefinition.objectType,
+                        label: selectedDefinition.label,
+                        properties: selectedDefinition
+                          .definition
+                          .properties,
+                        stages: selectedDefinition
+                          .definition
+                          .kanban
+                          .stages,
+                        propertyBehaviors: selectedDefinition
+                          .definition
+                          .kanban
+                          .propertyBehaviors,
+                      }
+                    : undefined
+                }
+                onSubmit={handleSubmit}
+                onCancel={handleCloseDialog}
+                submitLabel={dialogMode === 'create' ? 'Create Object Definition' : 'Save Changes'}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
     </ProtectedRoute>
   )

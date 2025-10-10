@@ -103,13 +103,46 @@ export function ObjectHistorySheet({ objectId, isOpen, onClose }: ObjectHistoryS
     return types[changeType] || changeType
   }
 
-  const renderChangeDetails = (entry: ObjectHistoryEntry): string => {
+  const renderChangeDetails = (entry: ObjectHistoryEntry): JSX.Element | string => {
     if (entry.changeType === 'created') {
       return 'Object created'
     }
 
     if (entry.changeType === 'stage_changed') {
       return `Moved from stage to new stage`
+    }
+
+    if (entry.changes && entry.changeType === 'property_update') {
+      return (
+        <div className="mt-2 space-y-2">
+          {Object
+            .entries(entry.changes)
+            .map(([propertyName, changeData]: [string, any]) => (
+              <div key={propertyName} className="text-xs bg-gray-50 p-2 rounded border border-gray-200">
+                <div className="font-semibold text-gray-700 mb-1">{propertyName}</div>
+                <div className="flex items-start gap-2">
+                  <div className="flex-1">
+                    <div className="text-gray-500 mb-0.5">Old:</div>
+                    <div className="text-gray-800 font-mono">
+                      {changeData.oldValue !== null && changeData.oldValue !== undefined
+                        ? JSON.stringify(changeData.oldValue)
+                        : '(empty)'}
+                    </div>
+                  </div>
+                  <div className="text-gray-400 mt-4">→</div>
+                  <div className="flex-1">
+                    <div className="text-gray-500 mb-0.5">New:</div>
+                    <div className="text-gray-800 font-mono">
+                      {changeData.newValue !== null && changeData.newValue !== undefined
+                        ? JSON.stringify(changeData.newValue)
+                        : '(empty)'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+        </div>
+      )
     }
 
     if (entry.changes) {
