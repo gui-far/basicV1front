@@ -83,9 +83,12 @@ export interface ObjectDefinitionGroup {
 }
 
 export interface GroupPermissions {
+  stageVisibility?: {
+    [stageId: string]: 'visible' | 'invisible'
+  }
   [stageId: string]: {
     [propertyName: string]: 'editable' | 'visible' | 'invisible'
-  }
+  } | { [stageId: string]: 'visible' | 'invisible' } | undefined
 }
 
 class ObjectDefinitionService {
@@ -313,7 +316,7 @@ class ObjectDefinitionService {
   async updateObjectDefinitionGroupPermissions(
     objectDefinitionId: string,
     groupId: string,
-    permissions: GroupPermissions,
+    data: any,
     accessToken: string,
   ): Promise<ObjectDefinitionGroup> {
     const url = `${this.baseUrl}/api/object-definition/${objectDefinitionId}/group/${groupId}/permissions`
@@ -325,7 +328,7 @@ class ObjectDefinitionService {
         Authorization: `Bearer ${accessToken}`,
       },
       body: JSON
-        .stringify({ permissions }),
+        .stringify(data),
     })
 
     if (!response.ok) {

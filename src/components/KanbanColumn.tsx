@@ -19,6 +19,7 @@ interface KanbanColumnProps {
   isOver: boolean
   nextStageId?: string
   previousStageId?: string
+  isShadowed?: boolean
 }
 
 export function KanbanColumn({
@@ -32,6 +33,7 @@ export function KanbanColumn({
   isOver,
   nextStageId,
   previousStageId,
+  isShadowed = false,
 }: KanbanColumnProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const { setNodeRef } = useDroppable({
@@ -71,8 +73,15 @@ export function KanbanColumn({
   }
 
   return (
-    <div className="flex-shrink-0 w-80">
-      <Card className={`h-full ${isOver ? 'ring-2 ring-blue-500' : ''}`}>
+    <div className="flex-shrink-0 w-80 relative">
+      {isShadowed && (
+        <div className="absolute inset-0 bg-gray-900 bg-opacity-10 z-10 rounded-lg flex items-center justify-center pointer-events-none">
+          <div className="bg-gray-800 text-white px-4 py-2 rounded-md text-sm font-medium shadow-lg">
+            🔒 No Access
+          </div>
+        </div>
+      )}
+      <Card className={`h-full ${isOver ? 'ring-2 ring-blue-500' : ''} ${isShadowed ? 'opacity-60' : ''}`}>
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center justify-between">
             <span>{stage.label}</span>
@@ -107,6 +116,7 @@ export function KanbanColumn({
             size="sm"
             className="w-full mb-3 cursor-pointer"
             variant="outline"
+            disabled={isShadowed}
           >
             + Create New
           </Button>

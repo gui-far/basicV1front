@@ -20,8 +20,7 @@ export default function ObjectsKanbanPage() {
   const router = useRouter()
   const params = useParams()
   const { toast } = useToast()
-  const objectType = params
-    .objectType as string
+  const objectType = decodeURIComponent(params.objectType as string)
 
   const [objectDefinition, setObjectDefinition] = useState<ObjectDefinition | null>(null)
   const [objects, setObjects] = useState<GenericObject[]>([])
@@ -29,6 +28,7 @@ export default function ObjectsKanbanPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [visibleStageIds, setVisibleStageIds] = useState<string[]>([])
 
   useEffect(() => {
     if (accessToken && objectType) {
@@ -48,6 +48,7 @@ export default function ObjectsKanbanPage() {
       const response = await genericObjectService
         .listObjects({ objectType }, accessToken!)
       setObjects(response.objects)
+      setVisibleStageIds(response.visibleStageIds || definition.definition.kanban.stages.map(s => s.id))
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to load data'
       setError(errorMessage)
@@ -258,6 +259,7 @@ export default function ObjectsKanbanPage() {
                 onObjectClick={handleObjectClick}
                 onDragEnd={handleDragEnd}
                 onCreateObject={handleCreateObject}
+                visibleStageIds={visibleStageIds}
               />
             </CardContent>
           </Card>

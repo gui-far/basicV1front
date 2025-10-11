@@ -11,6 +11,7 @@ interface KanbanBoardProps {
   onObjectClick: (object: GenericObject) => void
   onDragEnd: (objectId: string, newStageId: string) => Promise<void>
   onCreateObject: (properties: Record<string, any>, stageId: string) => Promise<void>
+  visibleStageIds?: string[]
 }
 
 export function KanbanBoard({
@@ -19,6 +20,7 @@ export function KanbanBoard({
   onObjectClick,
   onDragEnd,
   onCreateObject,
+  visibleStageIds = [],
 }: KanbanBoardProps) {
   const [activeObject, setActiveObject] = useState<GenericObject | null>(null)
   const [overId, setOverId] = useState<string | null>(null)
@@ -27,6 +29,13 @@ export function KanbanBoard({
     .definition
     .kanban
     .stages
+
+  const isStageShadowed = (stageId: string): boolean => {
+    if (visibleStageIds.length === 0) {
+      return false
+    }
+    return !visibleStageIds.includes(stageId)
+  }
 
   const getObjectsByStage = (stageId: string): GenericObject[] => {
     return objects
@@ -71,6 +80,11 @@ export function KanbanBoard({
     if (!object) return
 
     if (object.currentStageId === newStageId) return
+
+    // Prevent drag to shadowed stages
+    if (isStageShadowed(newStageId)) {
+      return
+    }
 
     // Validate rollback permission
     const currentStageIndex = stages
@@ -132,6 +146,7 @@ export function KanbanBoard({
           .map((stage, index) => {
             const nextStageId = index < stages.length - 1 ? stages[index + 1].id : undefined
             const previousStageId = index > 0 ? stages[index - 1].id : undefined
+            const isShadowed = isStageShadowed(stage.id)
             return (
               <KanbanColumn
                 key={stage.id}
@@ -145,6 +160,7 @@ export function KanbanBoard({
                 isOver={getOverStageId() === stage.id}
                 nextStageId={nextStageId}
                 previousStageId={previousStageId}
+                isShadowed={isShadowed}
               />
             )
           })}

@@ -54,16 +54,23 @@ export default function ManageStagePermissionsPage() {
       }
 
       setGroupAssignment(assignment)
-      setPermissions(assignment.permissions || {})
 
-      // Initialize all stages as visible by default
+      // Extract stageVisibility and permissions separately
+      const allPermissions = assignment.permissions || {}
+      const savedVisibility = (allPermissions as any)?.stageVisibility || {}
+
+      // Remove stageVisibility from permissions object to avoid duplication
+      const { stageVisibility: _, ...cleanPermissions } = allPermissions as any
+      setPermissions(cleanPermissions)
+
+      // Initialize stage visibility from saved data or default to visible
       const initialVisibility: { [stageId: string]: 'visible' | 'invisible' } = {}
       definition
         .definition
         .kanban
         .stages
         .forEach((stage) => {
-          initialVisibility[stage.id] = 'visible'
+          initialVisibility[stage.id] = savedVisibility[stage.id] || 'visible'
         })
       setStageVisibility(initialVisibility)
     } catch (err) {
@@ -144,11 +151,16 @@ export default function ManageStagePermissionsPage() {
         throw new Error('No access token available')
       }
 
+      const payload = {
+        stageVisibility,
+        permissions,
+      }
+
       await objectDefinitionService
         .updateObjectDefinitionGroupPermissions(
           objectDefinitionId,
           groupId,
-          permissions,
+          payload as any,
           accessToken
         )
 
@@ -281,8 +293,10 @@ export default function ManageStagePermissionsPage() {
                                       const options = getAvailableOptions(stage.id, property.name)
                                       const current = getCurrentPermission(stage.id, property.name)
 
+                                      const isStageInvisible = stageVisibility[stage.id] === 'invisible'
+
                                       return (
-                                        <TableCell key={stage.id} className="text-center">
+                                        <TableCell key={stage.id} className={`text-center ${isStageInvisible ? 'opacity-50' : ''}`}>
                                           {initial === 'invisible' ? (
                                             <div className="flex items-center justify-center">
                                               <Select
@@ -294,6 +308,7 @@ export default function ManageStagePermissionsPage() {
                                                     value as 'editable' | 'visible' | 'invisible'
                                                   )
                                                 }}
+                                                disabled={isStageInvisible}
                                               >
                                                 <SelectTrigger className="w-40 h-8 text-xs justify-center">
                                                   <SelectValue placeholder="Select" />
@@ -314,6 +329,7 @@ export default function ManageStagePermissionsPage() {
                                                     value as 'editable' | 'visible' | 'invisible'
                                                   )
                                                 }}
+                                                disabled={isStageInvisible}
                                               >
                                                 <SelectTrigger className="w-40 h-8 text-xs justify-center">
                                                   <SelectValue placeholder="Select" />
@@ -335,6 +351,7 @@ export default function ManageStagePermissionsPage() {
                                                     value as 'editable' | 'visible' | 'invisible'
                                                   )
                                                 }}
+                                                disabled={isStageInvisible}
                                               >
                                                 <SelectTrigger className="w-40 h-8 text-xs justify-center">
                                                   <SelectValue placeholder="Select" />

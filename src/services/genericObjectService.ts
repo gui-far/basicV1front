@@ -48,6 +48,7 @@ export interface ListGenericObjectsResponse {
   page: number
   limit: number
   totalPages: number
+  visibleStageIds?: string[]
 }
 
 export interface ObjectHistoryEntry {
